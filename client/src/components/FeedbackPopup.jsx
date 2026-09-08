@@ -94,7 +94,7 @@ export default function FeedbackPopup({ page, questions, sessionId, onClose }) {
     <div className="fixed bottom-24 left-4 right-4 z-50 w-auto max-w-sm sm:left-auto sm:right-4 sm:w-[min(100%-2rem,22rem)] animate-[slideUp_0.3s_ease-out]">
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-border bg-surface p-4 shadow-lg"
+        className="rounded-xl border-2 border-primary/25 bg-[#F7F8FA] p-4 shadow-2xl ring-1 ring-black/5"
       >
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
@@ -106,7 +106,7 @@ export default function FeedbackPopup({ page, questions, sessionId, onClose }) {
           <button
             type="button"
             onClick={() => onClose("dismiss")}
-            className="rounded p-1 text-text-secondary hover:bg-gray-50"
+            className="rounded p-1 text-text-secondary hover:bg-gray-200/80"
             aria-label={t("feedback.dismiss")}
           >
             ✕
@@ -118,25 +118,35 @@ export default function FeedbackPopup({ page, questions, sessionId, onClose }) {
             const options = normalizeOptions(q.options);
             return (
               <div key={q.id}>
-                <p className="mb-2 text-sm text-text-primary">{q.text}</p>
+                <p className="mb-2 text-sm font-medium text-text-primary">
+                  {q.text}
+                </p>
 
                 {q.type === "stars" && (
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setAnswer(q.id, star, String(star))}
-                        className={`text-xl leading-none ${
-                          answers[q.id]?.value >= star
-                            ? "text-warning"
-                            : "text-gray-300"
-                        }`}
-                        aria-label={`${star} stars`}
-                      >
-                        ★
-                      </button>
-                    ))}
+                  <div
+                    className="inline-flex gap-1 rounded-lg bg-white px-2 py-1.5 shadow-sm ring-1 ring-gray-200"
+                    role="group"
+                    aria-label={q.text}
+                  >
+                    {[1, 2, 3, 4, 5].map((star) => {
+                      const filled = Number(answers[q.id]?.value) >= star;
+                      return (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setAnswer(q.id, star, String(star))}
+                          className={`px-0.5 text-2xl leading-none transition-colors ${
+                            filled
+                              ? "text-amber-500 drop-shadow-sm"
+                              : "text-gray-400 hover:text-amber-400"
+                          }`}
+                          aria-label={`${star} stars`}
+                          aria-pressed={filled}
+                        >
+                          ★
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -152,7 +162,7 @@ export default function FeedbackPopup({ page, questions, sessionId, onClose }) {
                         className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
                           answers[q.id]?.value === option.value
                             ? "border-primary bg-primary text-white"
-                            : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                            : "border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
                         }`}
                       >
                         {option.label}
@@ -169,7 +179,7 @@ export default function FeedbackPopup({ page, questions, sessionId, onClose }) {
                       setAnswer(q.id, e.target.value, e.target.value)
                     }
                     placeholder={t("common.optional")}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent"
                   />
                 )}
               </div>
