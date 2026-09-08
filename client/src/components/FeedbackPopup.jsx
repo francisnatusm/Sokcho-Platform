@@ -94,7 +94,7 @@ export default function FeedbackPopup({ page, questions, sessionId, onClose }) {
     <div className="fixed bottom-24 left-4 right-4 z-50 w-auto max-w-sm sm:left-auto sm:right-4 sm:w-[min(100%-2rem,22rem)] animate-[slideUp_0.3s_ease-out]">
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-border bg-white p-4 shadow-lg"
+        className="rounded-xl border border-border bg-surface p-4 shadow-lg"
       >
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>

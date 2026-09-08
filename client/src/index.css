@@ -7,15 +7,15 @@
 :root {
   --primary: #1e3a5f;
   --primary-light: #2e5a8f;
-  --background: #f8f9fa;
-  --surface: #ffffff;
+  --background: #e8e9eb;
+  --surface: #d5d6d8;
   --text-primary: #1a1a2e;
   --text-secondary: #6b7280;
   --accent: #3b82f6;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --border: #e5e7eb;
+  --border: #c4c5c8;
 }
 
 body {

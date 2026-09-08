@@ -25,7 +25,7 @@ export default function WeatherWidget({ weather }) {
   const forecast = Array.isArray(data.forecast) ? data.forecast.slice(0, 7) : [];
 
   return (
-    <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-lg font-bold text-text-primary">{t("weather.title")}</h2>
         {data.updatedLabel ? (
@@ -69,7 +69,7 @@ export default function WeatherWidget({ weather }) {
       </dl>
 
       {forecast.length > 0 ? (
-        <div className="mt-5 border-t border-gray-100 pt-4">
+        <div className="mt-5 border-t border-border pt-4">
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-text-secondary">
             {t("weather.forecast")}
           </p>

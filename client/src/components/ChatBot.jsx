@@ -72,7 +72,7 @@ export default function ChatBot({ open, onOpen, onClose, onMessageCount }) {
             onClick={onClose}
           />
 
-          <aside className="relative flex h-full w-full max-w-md flex-col bg-white shadow-xl sm:w-[400px]">
+          <aside className="relative flex h-full w-full max-w-md flex-col bg-surface shadow-xl sm:w-[400px]">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <div>
                 <h2 className="text-base font-semibold text-text-primary">

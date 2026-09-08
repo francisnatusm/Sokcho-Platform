@@ -123,7 +123,7 @@ export default function Opportunities() {
         </button>
       </div>
 
-      <div className="mt-6 space-y-3 rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+      <div className="mt-6 space-y-3 rounded-xl border border-border bg-surface p-4 shadow-sm">
         <label className="block">
           <span className="mb-1 block text-sm font-medium text-text-primary">
             {t("jobs.lookingFor")}
@@ -178,7 +178,7 @@ export default function Opportunities() {
         {loading ? (
           <Loader label={t("jobs.loading")} />
         ) : filtered.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-border bg-white p-8 text-center text-sm text-text-secondary">
+          <p className="rounded-xl border border-dashed border-border bg-surface p-8 text-center text-sm text-text-secondary">
             {t("jobs.empty")}
           </p>
         ) : (

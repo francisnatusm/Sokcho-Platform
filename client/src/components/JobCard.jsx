@@ -22,7 +22,7 @@ export default function JobCard({ job, onOpen }) {
       : job.description || job.descriptionEn;
 
   return (
-    <article className="flex h-full flex-col rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+    <article className="flex h-full flex-col rounded-xl border border-border bg-surface p-6 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h3 className="text-lg font-bold text-text-primary">{title}</h3>
         <span

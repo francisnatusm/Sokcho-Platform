@@ -186,7 +186,7 @@ export default function CityPulse() {
 
         <aside className="space-y-4">
           <WeatherWidget weather={weather} />
-          <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
             <h2 className="text-lg font-bold text-text-primary">
               {t("pulse.announcements")}
             </h2>

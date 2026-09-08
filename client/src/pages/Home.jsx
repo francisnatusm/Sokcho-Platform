@@ -94,7 +94,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="border-b border-border bg-white">
+      <section className="border-b border-border bg-surface">
         <div className="mx-auto grid max-w-7xl gap-4 px-4 py-4 sm:grid-cols-3 sm:px-6">
           <Stat label={t("home.statTemp")} value={stats.temp} />
           <Stat label={t("home.statHeadline")} value={stats.headline} />
@@ -108,7 +108,7 @@ export default function Home() {
             <Link
               key={card.to}
               to={card.to}
-              className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm transition hover:border-primary/30 hover:shadow-md"
+              className="rounded-xl border border-border bg-surface p-6 shadow-sm transition hover:border-primary/30 hover:shadow-md"
             >
               <h2 className="text-xl font-bold text-text-primary">
                 {card.title}

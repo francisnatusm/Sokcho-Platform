@@ -32,7 +32,7 @@ export default function Navbar({ onOpenChat }) {
   }
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 border-b border-border bg-white shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-40 border-b border-border bg-surface shadow-sm">
       <nav className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <Link
           to="/"
@@ -87,7 +87,7 @@ export default function Navbar({ onOpenChat }) {
       </nav>
 
       {menuOpen && (
-        <div className="border-t border-border bg-white px-4 py-3 lg:hidden">
+        <div className="border-t border-border bg-surface px-4 py-3 lg:hidden">
           <div className="flex flex-col gap-1">
             {NAV_LINKS.map((link) => (
               <NavLink

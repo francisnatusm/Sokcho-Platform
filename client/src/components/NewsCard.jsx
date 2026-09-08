@@ -12,7 +12,7 @@ export default function NewsCard({ article, language = "en" }) {
       : article.summaryEn || article.descriptionEn || article.description;
 
   return (
-    <article className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+    <article className="rounded-xl border border-border bg-surface p-6 shadow-sm">
       <h3 className="text-lg font-bold text-text-primary">{title}</h3>
       <div className="mt-2 flex flex-wrap gap-2 text-xs text-text-secondary">
         {article.source && <span>{article.source}</span>}

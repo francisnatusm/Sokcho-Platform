@@ -99,7 +99,7 @@ export default function InternationalNavigator() {
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[260px_1fr]">
-        <aside className="h-fit rounded-xl border border-gray-100 bg-white p-3 shadow-sm">
+        <aside className="h-fit rounded-xl border border-border bg-surface p-3 shadow-sm">
           <nav className="flex flex-col gap-1">
             {TABS.map((tab) => (
               <button
@@ -118,8 +118,8 @@ export default function InternationalNavigator() {
           </nav>
         </aside>
 
-        <section className="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-          <div className="mb-5 border-b border-gray-100 pb-4">
+        <section className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+          <div className="mb-5 border-b border-border pb-4">
             <h2 className="text-xl font-bold text-text-primary">
               {tabMeta?.label || payload?.title}
             </h2>

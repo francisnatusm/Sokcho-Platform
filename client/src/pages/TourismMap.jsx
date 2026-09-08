@@ -385,7 +385,7 @@ export default function TourismMap() {
         />
 
         <aside className="space-y-4">
-          <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
             {!selected ? (
               <>
                 <h2 className="font-bold text-text-primary">{t("map.categories")}</h2>
@@ -486,7 +486,7 @@ export default function TourismMap() {
             )}
           </div>
 
-          <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
+          <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
             <h2 className="font-bold text-text-primary">{t("map.visitors")}</h2>
             <p className="mt-1 text-xs text-text-secondary">
               {statsMeta.note || t("map.visitorsNote")}
