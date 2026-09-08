@@ -28,9 +28,17 @@ function isConfiguredValue(value) {
 }
 
 function getPrivateKey() {
-  const raw = process.env.FIREBASE_PRIVATE_KEY;
+  let raw = process.env.FIREBASE_PRIVATE_KEY;
   if (!isConfiguredValue(raw)) return undefined;
-  return raw.replace(/\\n/g, "\n");
+  raw = raw.trim();
+  // Vercel / dotenv often store the value wrapped in quotes
+  if (
+    (raw.startsWith('"') && raw.endsWith('"')) ||
+    (raw.startsWith("'") && raw.endsWith("'"))
+  ) {
+    raw = raw.slice(1, -1);
+  }
+  return raw.replace(/\\r\\n/g, "\n").replace(/\\n/g, "\n");
 }
 
 /**
@@ -75,13 +83,22 @@ export function initFirebaseAdmin() {
 
   applyLocalTlsWorkaround();
 
-  app = initializeApp({
-    credential: cert({
-      projectId,
-      clientEmail,
-      privateKey,
-    }),
-  });
+  try {
+    app = initializeApp({
+      credential: cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
+    });
+  } catch (err) {
+    console.error(
+      "[firebase] Admin SDK init failed — check FIREBASE_PRIVATE_KEY format (use \\n for newlines, no surrounding quotes in Vercel):",
+      err.message
+    );
+    app = null;
+    return null;
+  }
 
   return app;
 }

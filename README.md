@@ -40,10 +40,12 @@ npm run seed:navigator
 3. **Important for production:**
    - Leave `VITE_API_BASE_URL` **empty** (frontend calls same-origin `/api/...`)
    - Set `ALLOW_INSECURE_TLS` empty/false (never `true` on Vercel)
-   - Set `CLIENT_ORIGIN` to your live site URL (e.g. `https://your-app.vercel.app`)
+   - Set `CLIENT_ORIGIN` to your live site URL (e.g. `https://sokcho-platform.vercel.app`)
+   - For `FIREBASE_PRIVATE_KEY`: paste the key as one line with `\n` escapes, **without** wrapping quotes in the Vercel UI
 4. Deploy. Cron hits `/api/refresh/ensure` daily at 21:00 UTC.
+5. If `/api/health` returns 500, open Vercel → Project → Logs (or the failed deployment → Functions) and check for missing modules or Firebase key errors.
 
 Root `vercel.json` builds the Vite client and routes `/api/*` to the Express serverless function.
 
 ## Live Demo
-[To be added after deployment]
+https://sokcho-platform.vercel.app

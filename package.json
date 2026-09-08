@@ -3,6 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "description": "Sokcho Smart City Intelligence Platform",
+  "type": "module",
   "scripts": {
     "dev:server": "npm run dev --prefix server",
     "dev:client": "npm run dev --prefix client",
@@ -11,5 +12,13 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^14.3.0"
   }
 }

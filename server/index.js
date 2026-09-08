@@ -18,7 +18,12 @@ import feedbackRouter from "./routes/feedback.js";
 import refreshRouter from "./routes/refresh.js";
 import { startDailyRefreshScheduler } from "./services/dailyRefreshService.js";
 
-const firebaseApp = initFirebaseAdmin();
+let firebaseApp = null;
+try {
+  firebaseApp = initFirebaseAdmin();
+} catch (err) {
+  console.error("[boot] Firebase init error:", err.message);
+}
 
 const app = express();
 app.use(express.json({ limit: "1mb" }));
