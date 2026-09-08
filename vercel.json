@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "installCommand": "npm install --prefix server && npm install --prefix client",
+  "buildCommand": "npm run build --prefix client",
+  "outputDirectory": "client/dist",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 60,
+      "memory": 1024,
+      "includeFiles": "server/**"
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/refresh/ensure",
+      "schedule": "0 21 * * *"
+    }
+  ]
+}

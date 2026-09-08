@@ -1,0 +1,30 @@
+{
+  "name": "sokcho-platform-server",
+  "version": "1.0.0",
+  "description": "Sokcho Smart City Intelligence Platform API",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "node index.js",
+    "test:firebase": "node scripts/testFirebase.js",
+    "seed:navigator": "node scripts/seedNavigator.js",
+    "export:feedback": "node scripts/exportFeedback.js",
+    "refresh:daily": "node scripts/refreshDaily.js",
+    "refresh:daily:light": "node scripts/refreshDaily.js --skip-jobs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.123.0",
+    "cheerio": "^1.2.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "firebase-admin": "^14.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
