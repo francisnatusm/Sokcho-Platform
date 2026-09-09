@@ -72,7 +72,7 @@ export const translations = {
     "weather.src.kma": "KMA",
 
     "jobs.title": "Opportunities",
-    "jobs.subtitle": "Jobs around Sokcho from multiple platforms — refreshed daily",
+    "jobs.subtitle": "Jobs around Sokcho from multiple platforms",
     "jobs.snapshot": "Snapshot {when}",
     "jobs.refresh": "Refresh today's jobs",
     "jobs.lookingFor": "What kind of job are you looking for?",
@@ -243,7 +243,7 @@ export const translations = {
     "weather.src.kma": "기상청",
 
     "jobs.title": "채용·기회",
-    "jobs.subtitle": "속초·인근 채용 정보를 여러 플랫폼에서 모아 매일 갱신합니다",
+    "jobs.subtitle": "속초·인근 채용 정보를 여러 플랫폼에서 모았습니다",
     "jobs.snapshot": "스냅샷 {when}",
     "jobs.refresh": "오늘 채용 새로고침",
     "jobs.lookingFor": "어떤 일자리를 찾고 계신가요?",

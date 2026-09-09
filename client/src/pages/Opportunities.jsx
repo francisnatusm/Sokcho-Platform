@@ -33,10 +33,9 @@ const CAMPUS = [
 ];
 
 export default function Opportunities() {
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
   const { triggerFeedback, feedbackUI } = useFeedback();
   const [jobs, setJobs] = useState([]);
-  const [cachedAt, setCachedAt] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [type, setType] = useState("all");
@@ -52,7 +51,6 @@ export default function Opportunities() {
     try {
       const data = await getJobs();
       setJobs(Array.isArray(data?.items) ? data.items : []);
-      setCachedAt(data?.cachedAt || null);
     } catch (err) {
       setError(err.message || "Could not load jobs");
       setJobs([]);
@@ -101,17 +99,12 @@ export default function Opportunities() {
     }
   }
 
-  const updatedLabel = formatUpdated(cachedAt, language);
-
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-text-primary">{t("jobs.title")}</h1>
-          <p className="mt-1 text-text-secondary">
-            {t("jobs.subtitle")}
-            {updatedLabel ? ` · ${t("jobs.snapshot", { when: updatedLabel })}` : ""}
-          </p>
+          <p className="mt-1 text-text-secondary">{t("jobs.subtitle")}</p>
         </div>
         <button
           type="button"
@@ -227,20 +220,4 @@ function labelType(value, t) {
   if (value === "internship") return t("jobs.internship");
   if (value === "fulltime") return t("jobs.fulltime");
   return value;
-}
-
-function formatUpdated(cachedAt, language) {
-  if (!cachedAt) return "";
-  try {
-    const d = new Date(cachedAt);
-    if (Number.isNaN(d.getTime())) return "";
-    return d.toLocaleString(language === "ko" ? "ko-KR" : "en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
 }
