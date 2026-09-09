@@ -639,20 +639,22 @@ async function collectDailyJobs(forceRefresh = false) {
           localizedAt: new Date().toISOString(),
         });
 
-        // Polish leftover Hangul titles in the background
-        enrichJobsWithEnglish(local, { useClaude: true, claudeLimit: 200 })
-          .then(async (polished) => {
-            await setCached("jobs_cache", cacheId, {
-              ...cached,
-              items: polished,
-              localizedAt: new Date().toISOString(),
-              claudeLocalized: true,
-            });
-            console.log("[jobs] background Claude title polish saved");
-          })
-          .catch((err) =>
-            console.warn("[jobs] background polish failed:", err.message)
-          );
+        // Polish leftover Hangul titles in the background (local/long-running only)
+        if (!process.env.VERCEL) {
+          enrichJobsWithEnglish(local, { useClaude: true, claudeLimit: 200 })
+            .then(async (polished) => {
+              await setCached("jobs_cache", cacheId, {
+                ...cached,
+                items: polished,
+                localizedAt: new Date().toISOString(),
+                claudeLocalized: true,
+              });
+              console.log("[jobs] background Claude title polish saved");
+            })
+            .catch((err) =>
+              console.warn("[jobs] background polish failed:", err.message)
+            );
+        }
 
         return {
           items: local,

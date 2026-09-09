@@ -34,72 +34,111 @@ function safe(value, fallback = "n/a") {
   return String(value);
 }
 
+async function withTimeout(promise, ms, label) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`${label} timed out after ${ms}ms`)),
+          ms
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function buildLiveSnapshot() {
   const parts = [];
+  const SNAP_MS = process.env.VERCEL ? 8000 : 20000;
 
-  try {
-    const w = await fetchSokchoWeather({ force: false });
-    if (w) {
-      parts.push(
-        `WEATHER (Sokcho): ${safe(w.temp)}°C, ${safe(w.condition)}; humidity ${safe(w.humidity)}%; precip ${safe(w.precipitation)}%; wind ${safe(w.wind)}. Source: ${safe(w.source, "platform")}.`
-      );
-      if (Array.isArray(w.forecast) && w.forecast.length) {
-        const days = w.forecast
-          .slice(0, 5)
-          .map(
-            (d) =>
-              `${safe(d.day || d.date)}: ${safe(d.high ?? d.max)}°/${safe(d.low ?? d.min)}° ${safe(d.condition)}`
-          )
-          .join(" | ");
-        parts.push(`FORECAST: ${days}`);
+  const tasks = [
+    (async () => {
+      try {
+        const w = await withTimeout(
+          fetchSokchoWeather({ force: false }),
+          SNAP_MS,
+          "weather"
+        );
+        if (w) {
+          parts.push(
+            `WEATHER (Sokcho): ${safe(w.temp)}°C, ${safe(w.condition)}; humidity ${safe(w.humidity)}%; precip ${safe(w.precipitation)}%; wind ${safe(w.wind)}. Source: ${safe(w.source, "platform")}.`
+          );
+          if (Array.isArray(w.forecast) && w.forecast.length) {
+            const days = w.forecast
+              .slice(0, 5)
+              .map(
+                (d) =>
+                  `${safe(d.day || d.date)}: ${safe(d.high ?? d.max)}°/${safe(d.low ?? d.min)}° ${safe(d.condition)}`
+              )
+              .join(" | ");
+            parts.push(`FORECAST: ${days}`);
+          }
+        }
+      } catch (err) {
+        parts.push(`WEATHER: unavailable (${err.message})`);
       }
-    }
-  } catch (err) {
-    parts.push(`WEATHER: unavailable (${err.message})`);
-  }
+    })(),
+    (async () => {
+      try {
+        const news = await withTimeout(
+          fetchSokchoNews({ force: false }),
+          SNAP_MS,
+          "news"
+        );
+        const list = Array.isArray(news) ? news : news?.items || [];
+        if (list.length) {
+          const lines = list.slice(0, 8).map((n, i) => {
+            const title = n.summaryEn || n.title || "Untitled";
+            const src = n.source ? ` (${n.source})` : "";
+            return `${i + 1}. ${title}${src}`;
+          });
+          parts.push(`NEWS HEADLINES (${list.length} cached):\n${lines.join("\n")}`);
+        } else {
+          parts.push("NEWS: no cached articles");
+        }
+      } catch (err) {
+        parts.push(`NEWS: unavailable (${err.message})`);
+      }
+    })(),
+    (async () => {
+      try {
+        const jobs = await withTimeout(fetchJobs({}), SNAP_MS, "jobs");
+        const items = jobs?.items || [];
+        const sample = items.slice(0, 6).map((j, i) => {
+          return `${i + 1}. ${safe(j.title)} @ ${safe(j.company)} - ${safe(j.location)} [${safe(j.source)}]`;
+        });
+        parts.push(
+          `JOBS: ${items.length} listings in today's Opportunities cache. Sample:\n${sample.join("\n") || "(empty)"}`
+        );
+      } catch (err) {
+        parts.push(`JOBS: unavailable (${err.message})`);
+      }
+    })(),
+    (async () => {
+      try {
+        const places = await withTimeout(
+          fetchAttractions({ force: false }),
+          SNAP_MS,
+          "places"
+        );
+        const list = Array.isArray(places) ? places : places?.items || [];
+        const sample = list.slice(0, 8).map((p, i) => {
+          return `${i + 1}. ${safe(p.name || p.title)} (${safe(p.category || p.type)})`;
+        });
+        parts.push(
+          `PLACES: ${list.length} Tourism Map pins cached. Sample:\n${sample.join("\n") || "(empty)"}`
+        );
+      } catch (err) {
+        parts.push(`PLACES: unavailable (${err.message})`);
+      }
+    })(),
+  ];
 
-  try {
-    const news = await fetchSokchoNews({ force: false });
-    const list = Array.isArray(news) ? news : news?.items || [];
-    if (list.length) {
-      const lines = list.slice(0, 8).map((n, i) => {
-        const title = n.summaryEn || n.title || "Untitled";
-        const src = n.source ? ` (${n.source})` : "";
-        return `${i + 1}. ${title}${src}`;
-      });
-      parts.push(`NEWS HEADLINES (${list.length} cached):\n${lines.join("\n")}`);
-    } else {
-      parts.push("NEWS: no cached articles");
-    }
-  } catch (err) {
-    parts.push(`NEWS: unavailable (${err.message})`);
-  }
-
-  try {
-    const jobs = await fetchJobs({});
-    const items = jobs?.items || [];
-    const sample = items.slice(0, 6).map((j, i) => {
-      return `${i + 1}. ${safe(j.title)} @ ${safe(j.company)} — ${safe(j.location)} [${safe(j.source)}]`;
-    });
-    parts.push(
-      `JOBS: ${items.length} listings in today's Opportunities cache. Sample:\n${sample.join("\n") || "(empty)"}`
-    );
-  } catch (err) {
-    parts.push(`JOBS: unavailable (${err.message})`);
-  }
-
-  try {
-    const places = await fetchAttractions({ force: false });
-    const list = Array.isArray(places) ? places : places?.items || [];
-    const sample = list.slice(0, 8).map((p, i) => {
-      return `${i + 1}. ${safe(p.name || p.title)} (${safe(p.category || p.type)})`;
-    });
-    parts.push(
-      `PLACES: ${list.length} Tourism Map pins cached. Sample:\n${sample.join("\n") || "(empty)"}`
-    );
-  } catch (err) {
-    parts.push(`PLACES: unavailable (${err.message})`);
-  }
+  await Promise.all(tasks);
 
   try {
     const visa = getStaticNavigatorSection("visa");
@@ -108,7 +147,7 @@ async function buildLiveSnapshot() {
     const pick = (section, n = 2) =>
       (section.content || [])
         .slice(0, n)
-        .map((c) => `- ${c.title}: ${(c.body || "").slice(0, 160)}…`)
+        .map((c) => `- ${c.title}: ${(c.body || "").slice(0, 160)}...`)
         .join("\n");
     parts.push(
       `NAVIGATOR SHORTCUTS:\nVisa:\n${pick(visa)}\nCampus:\n${pick(campus)}\nLanguage (KIIP/TOPIK/IELTS):\n${pick(lang, 3)}`
