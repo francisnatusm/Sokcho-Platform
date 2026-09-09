@@ -353,7 +353,8 @@ function daysFromNow(days) {
 }
 
 function todayKey() {
-  return new Date().toISOString().slice(0, 10);
+  // Asia/Seoul calendar date (UTC+9) — must match dailyRefreshService / cron
+  return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 }
 
 function guessType(title = "", source = "") {
@@ -670,6 +671,30 @@ async function collectDailyJobs(forceRefresh = false) {
 
   const sources = buildJobSources();
   let scraped = [];
+
+  // On Vercel GET (no force): never run a multi-minute scrape in the request path.
+  // Seed curated jobs into today's cache so Home / Opportunities stay fast.
+  // Heavy scrape belongs to cron / POST /api/jobs/refresh only.
+  const onVercel = Boolean(process.env.VERCEL);
+  if (onVercel && !forceRefresh) {
+    const quick = sortJobsStudentFirst(enrichJobsLocal([...CURATED_JOBS]));
+    await setCached("jobs_cache", cacheId, {
+      items: quick,
+      day: todayKey(),
+      scrapedCount: 0,
+      uniqueCount: quick.length,
+      bySource: { Curated: quick.length },
+      platforms: ["Curated"],
+      localizedAt: new Date().toISOString(),
+      note: "vercel-fast-seed",
+    });
+    return {
+      items: quick,
+      cachedAt: new Date().toISOString(),
+      source: "curated",
+    };
+  }
+
   if (hasBrightDataKey()) {
     console.log(`[jobs] scraping ${sources.length} sources (Karrot-first)…`);
     scraped = await scrapeAllSources(sources, 4);
@@ -680,10 +705,10 @@ async function collectDailyJobs(forceRefresh = false) {
   const merged = sortJobsStudentFirst(
     dedupeJobs([...CURATED_JOBS, ...scraped])
   );
-  // Rules first for speed; Claude polish capped
+  // Rules first for speed; skip Claude polish on Vercel to avoid timeouts
   const localized = await enrichJobsWithEnglish(merged, {
-    useClaude: true,
-    claudeLimit: 200,
+    useClaude: !onVercel,
+    claudeLimit: onVercel ? 0 : 200,
   });
 
   const bySource = localized.reduce((acc, j) => {

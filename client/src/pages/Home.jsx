@@ -38,15 +38,11 @@ export default function Home() {
     let cancelled = false;
 
     async function loadStats() {
-      const next = {
-        temp: "—",
-        headline: t("home.loadingNews"),
-        jobs: "—",
-      };
-
       try {
         const weather = await getWeather();
-        if (weather?.temp != null) next.temp = `${weather.temp}°C`;
+        if (!cancelled && weather?.temp != null) {
+          setStats((prev) => ({ ...prev, temp: `${weather.temp}°C` }));
+        }
       } catch {
         /* keep */
       }
@@ -55,26 +51,42 @@ export default function Home() {
         const news = await getNews();
         const items = Array.isArray(news) ? news : news?.items;
         const first = items?.[0];
-        if (first) {
-          next.headline =
-            language === "en"
-              ? first.summaryEn || first.titleEn || first.title
-              : first.title || first.summaryEn;
+        if (!cancelled && first) {
+          setStats((prev) => ({
+            ...prev,
+            headline:
+              language === "en"
+                ? first.summaryEn || first.titleEn || first.title
+                : first.title || first.summaryEn,
+          }));
         }
       } catch {
-        /* keep */
+        if (!cancelled) {
+          setStats((prev) => ({
+            ...prev,
+            headline: prev.headline || "—",
+          }));
+        }
       }
 
       try {
         const jobs = await getJobs();
-        if (Array.isArray(jobs?.items)) next.jobs = String(jobs.items.length);
+        if (!cancelled && Array.isArray(jobs?.items)) {
+          setStats((prev) => ({
+            ...prev,
+            jobs: String(jobs.items.length),
+          }));
+        }
       } catch {
         /* keep */
       }
-
-      if (!cancelled) setStats(next);
     }
 
+    setStats({
+      temp: "—",
+      headline: t("home.loadingNews"),
+      jobs: "—",
+    });
     loadStats();
     return () => {
       cancelled = true;
