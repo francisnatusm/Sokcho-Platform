@@ -108,21 +108,43 @@ export async function getLastDailyRefresh() {
 }
 
 /**
- * Ensure today's jobs snapshot exists. If missing, run a full refresh.
- * Safe to call on server boot and on a timer.
+ * Ensure today's snapshot exists / is a real daily refresh.
+ * Safe to call from Vercel Cron (GET /api/refresh/ensure).
  */
 export async function ensureTodaySnapshot() {
   const day = kstToday();
   const jobsCache = await getCached("jobs_cache", `sokcho-${day}`);
   const meta = await getLastDailyRefresh();
 
-  if (jobsCache?.items?.length && meta?.day === day) {
+  const hasRealJobs =
+    Boolean(jobsCache?.items?.length) &&
+    jobsCache.note !== "vercel-fast-seed" &&
+    Number(jobsCache.scrapedCount || 0) > 0;
+
+  if (hasRealJobs && meta?.day === day) {
     return { skipped: true, day, reason: "already_refreshed_today" };
   }
 
-  // Prefer full daily refresh when jobs are missing; skip heavy scrape if
-  // only meta is missing but jobs exist (e.g. manual jobs refresh already ran)
-  if (jobsCache?.items?.length) {
+  // On Vercel cron (60s limit): scrape jobs first (lite), then refresh
+  // news/weather/tourism/navigator without another jobs scrape.
+  if (process.env.VERCEL && !hasRealJobs) {
+    let jobsResult = null;
+    try {
+      const jobs = await refreshJobsForToday();
+      jobsResult = {
+        ok: true,
+        count: jobs.items?.length || 0,
+        source: jobs.source,
+      };
+    } catch (err) {
+      console.error("[daily-refresh] vercel jobs-first failed:", err.message);
+      jobsResult = { ok: false, error: err.message };
+    }
+    const light = await runDailyRefresh({ includeJobs: false });
+    return { skipped: false, day, vercelSplit: true, jobs: jobsResult, ...light };
+  }
+
+  if (hasRealJobs) {
     const light = await runDailyRefresh({ includeJobs: false });
     return { skipped: false, day, light: true, ...light };
   }

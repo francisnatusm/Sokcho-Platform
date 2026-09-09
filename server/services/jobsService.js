@@ -348,6 +348,32 @@ function buildJobSources() {
   return sources;
 }
 
+/** Fewer Bright Data calls — fits Vercel cron / force-refresh within ~60s. */
+function buildJobSourcesLite() {
+  const sources = [];
+  for (const dong of KARROT_DONGS.slice(0, 4)) {
+    sources.push(karrotDongUrl(dong));
+  }
+  sources.push({
+    name: "Saramin",
+    platform: "saramin",
+    label: "Saramin Sokcho p1",
+    url: `https://www.saramin.co.kr/zf_user/search?searchword=${encodeURIComponent("속초")}&searchType=search&recruitPage=1&recruitPageCount=40`,
+    selectors: [
+      ".item_recruit .job_tit a",
+      'a[href*="/zf_user/jobs/relay/view"]',
+    ],
+  });
+  sources.push({
+    name: "Albamon",
+    platform: "albamon",
+    label: "Albamon Sokcho",
+    url: `https://www.albamon.com/jobs/total?keyword=${encodeURIComponent("속초")}&page=1`,
+    selectors: ['a[href*="/jobs/detail/"]', 'a[href*="/job/"]'],
+  });
+  return sources;
+}
+
 function daysFromNow(days) {
   return new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
 }
@@ -543,9 +569,16 @@ async function scrapePlatform(source) {
 }
 
 /** Run scrapes in small parallel batches to avoid rate limits. */
-async function scrapeAllSources(sources, concurrency = 4) {
+async function scrapeAllSources(sources, concurrency = 4, budgetMs = 0) {
   const out = [];
+  const started = Date.now();
   for (let i = 0; i < sources.length; i += concurrency) {
+    if (budgetMs > 0 && Date.now() - started > budgetMs) {
+      console.warn(
+        `[jobs] scrape budget ${budgetMs}ms hit after ${i}/${sources.length} sources`
+      );
+      break;
+    }
     const chunk = sources.slice(i, i + concurrency);
     const batches = await Promise.all(chunk.map(scrapePlatform));
     out.push(...batches.flat());
@@ -671,12 +704,6 @@ async function collectDailyJobs(forceRefresh = false) {
     }
   }
 
-  const sources = buildJobSources();
-  let scraped = [];
-
-  // On Vercel GET (no force): never run a multi-minute scrape in the request path.
-  // Seed curated jobs into today's cache so Home / Opportunities stay fast.
-  // Heavy scrape belongs to cron / POST /api/jobs/refresh only.
   const onVercel = Boolean(process.env.VERCEL);
   if (onVercel && !forceRefresh) {
     const quick = sortJobsStudentFirst(enrichJobsLocal([...CURATED_JOBS]));
@@ -697,9 +724,17 @@ async function collectDailyJobs(forceRefresh = false) {
     };
   }
 
+  const sources = onVercel ? buildJobSourcesLite() : buildJobSources();
+  let scraped = [];
   if (hasBrightDataKey()) {
-    console.log(`[jobs] scraping ${sources.length} sources (Karrot-first)…`);
-    scraped = await scrapeAllSources(sources, 4);
+    console.log(
+      `[jobs] scraping ${sources.length} sources (${onVercel ? "lite/cron" : "full"})…`
+    );
+    scraped = await scrapeAllSources(
+      sources,
+      onVercel ? 3 : 4,
+      onVercel ? 42000 : 0
+    );
   } else {
     console.warn("[jobs] Bright Data key missing — curated jobs only");
   }
@@ -726,6 +761,7 @@ async function collectDailyJobs(forceRefresh = false) {
     bySource,
     platforms: [...new Set(sources.map((s) => s.name))],
     localizedAt: new Date().toISOString(),
+    note: scraped.length ? "daily-scrape" : "curated-only",
   });
 
   const pruned = await pruneOldCaches("jobs_cache", {
