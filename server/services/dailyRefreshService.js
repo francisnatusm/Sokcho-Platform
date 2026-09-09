@@ -13,10 +13,9 @@ function kstToday() {
 }
 
 /**
- * Full daily snapshot refresh:
- * - Jobs: re-scrape and REPLACE today's list (gone from boards = removed)
- * - News / weather / tourism: force fresh fetch and overwrite cache
- * - Navigator: re-seed guides + optional Bright Data live notes
+ * Full daily snapshot refresh (WRITE path):
+ * - Jobs / news / weather / tourism / navigator: fetch live data and OVERWRITE Firestore
+ * - Platform GET routes only READ that cache (see each *Service.js)
  */
 export async function runDailyRefresh({ includeJobs = true } = {}) {
   const day = kstToday();

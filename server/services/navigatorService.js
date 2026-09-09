@@ -106,16 +106,18 @@ export async function fetchNavigatorSection(section, options = {}) {
 
   const force = options.force === true;
 
+  // READ PATH: serve Firestore (or static) — no Bright Data.
+  // WRITE PATH: force/cron may enrich with Bright Data and overwrite.
   if (!force) {
     const cached = await getCached("navigator_content", section);
-    if (cached?.content?.length && cacheAgeMs(cached.cachedAt) < CACHE_TTL_MS) {
+    if (cached?.content?.length) {
       return cached;
     }
+    return mergeSection(section, {});
   }
 
-  // Prefer rich static pack; Bright Data live notes only on explicit refresh
   let liveNotes = {};
-  if (force && hasBrightDataKey()) {
+  if (hasBrightDataKey()) {
     try {
       liveNotes = await enrichFromBrightData();
     } catch (err) {

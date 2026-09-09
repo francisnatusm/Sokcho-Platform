@@ -72,6 +72,10 @@ function todayKey() {
   return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 }
 
+function yesterdayKey() {
+  return new Date(Date.now() + 9 * 3600000 - 86400000).toISOString().slice(0, 10);
+}
+
 function stripHtml(value = "") {
   return value
     .replace(/<[^>]+>/g, "")
@@ -341,21 +345,24 @@ async function enrichSummaries(items) {
 async function collectNews(forceRefresh = false) {
   const cacheId = `sokcho-${todayKey()}`;
 
+  // READ PATH: UI only recovers from Firestore. WRITE PATH: force/cron scrapes + overwrites.
   if (!forceRefresh) {
-    // Prefer today's daily snapshot
     const daily = await getCached("news_cache", cacheId);
     if (daily?.items?.length) {
       return daily.items;
     }
 
     const legacy = await getCached("news_cache", "sokcho");
-    if (
-      legacy?.items?.length &&
-      legacy.cachedAt &&
-      Date.now() - new Date(legacy.cachedAt).getTime() < CACHE_TTL_MS
-    ) {
+    if (legacy?.items?.length) {
       return legacy.items;
     }
+
+    const yesterday = await getCached("news_cache", `sokcho-${yesterdayKey()}`);
+    if (yesterday?.items?.length) {
+      return yesterday.items;
+    }
+
+    return MOCK_NEWS;
   }
 
   console.log("[news] collecting Sokcho headlines…");

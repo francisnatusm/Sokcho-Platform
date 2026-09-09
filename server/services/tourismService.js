@@ -497,28 +497,21 @@ export async function fetchAttractions(options = {}) {
   const forceRefresh = options.force === true;
   const cacheId = "places";
 
+  // READ PATH: recover from DB only. WRITE PATH: force/cron scrapes + overwrites.
   if (!forceRefresh) {
     try {
       const cached = await getCached("tourism_cache", cacheId);
-      if (
-        cached?.items?.length &&
-        cached.cachedAt &&
-        Date.now() - new Date(cached.cachedAt).getTime() < PLACES_TTL_MS
-      ) {
+      if (cached?.items?.length) {
         return cached.items;
       }
-      // legacy key
       const legacy = await getCached("tourism_cache", "attractions");
-      if (
-        legacy?.items?.length &&
-        legacy.cachedAt &&
-        Date.now() - new Date(legacy.cachedAt).getTime() < PLACES_TTL_MS
-      ) {
+      if (legacy?.items?.length) {
         return legacy.items;
       }
     } catch {
       /* optional */
     }
+    return [...CIVIC_PLACES, ...FALLBACK_PLACES];
   }
 
   let ktoPlaces = [];
@@ -581,14 +574,11 @@ export async function fetchVisitorStats(options = {}) {
   const forceRefresh = options.force === true;
   const months = Number(options.months) > 0 ? Number(options.months) : 6;
 
+  // READ PATH: recover from DB only. WRITE PATH: force/cron overwrites.
   if (!forceRefresh) {
     try {
       const cached = await getCached("tourism_cache", "visitor_stats");
-      if (
-        cached?.all?.length &&
-        cached.cachedAt &&
-        Date.now() - new Date(cached.cachedAt).getTime() < VISITOR_TTL_MS
-      ) {
+      if (cached?.all?.length) {
         const items = cached.all.slice(-months);
         return {
           items,
@@ -602,6 +592,16 @@ export async function fetchVisitorStats(options = {}) {
     } catch {
       /* optional */
     }
+    const all = VISITOR_STATS_FALLBACK;
+    const items = all.slice(-months);
+    return {
+      items,
+      all,
+      year: items[items.length - 1]?.year || null,
+      latestYm: items[items.length - 1]?.ym || null,
+      source: "fallback",
+      note: "Offline fallback sample",
+    };
   }
 
   // Request a wide window; Data Lab returns whatever months are published

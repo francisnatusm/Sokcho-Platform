@@ -223,20 +223,19 @@ function mergeWeather(primary, forecastSource) {
 export async function fetchSokchoWeather(options = {}) {
   const forceRefresh = options.force === true;
 
+  // READ PATH: serve last stored weather from DB (ignore short TTL).
+  // WRITE PATH: force/cron fetches APIs and overwrites weather_cache/sokcho.
   if (!forceRefresh) {
     try {
       const cached = await getCached("weather_cache", "sokcho");
-      if (
-        cached?.temp != null &&
-        cached.cachedAt &&
-        Date.now() - new Date(cached.cachedAt).getTime() < WEATHER_TTL_MS
-      ) {
+      if (cached?.temp != null) {
         const { cachedAt, ...weather } = cached;
         return weather;
       }
     } catch {
       /* optional */
     }
+    return MOCK_WEATHER;
   }
 
   let google = null;

@@ -383,6 +383,10 @@ function todayKey() {
   return new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
 }
 
+function yesterdayKey() {
+  return new Date(Date.now() + 9 * 3600000 - 86400000).toISOString().slice(0, 10);
+}
+
 function guessType(title = "", source = "") {
   return guessJobType(title, { source });
 }
@@ -652,6 +656,8 @@ async function enrichJobsWithEnglish(jobs, { useClaude = false, claudeLimit = 16
 async function collectDailyJobs(forceRefresh = false) {
   const cacheId = `sokcho-${todayKey()}`;
 
+  // READ PATH: platform pages only recover from Firestore (no scrape).
+  // WRITE PATH: forceRefresh / cron overwrites today's doc with scraped jobs.
   if (!forceRefresh) {
     const cached = await getCached("jobs_cache", cacheId);
     if (cached?.items?.length) {
@@ -664,31 +670,7 @@ async function collectDailyJobs(forceRefresh = false) {
         (j) => !j.titleEn || hangulRatio(j.titleEn) >= 0.55
       );
       if (needsEn) {
-        // Instant rule-based English so the UI updates without waiting on Claude
         const local = enrichJobsLocal(cached.items);
-        await setCached("jobs_cache", cacheId, {
-          ...cached,
-          items: local,
-          localizedAt: new Date().toISOString(),
-        });
-
-        // Polish leftover Hangul titles in the background (local/long-running only)
-        if (!process.env.VERCEL) {
-          enrichJobsWithEnglish(local, { useClaude: true, claudeLimit: 200 })
-            .then(async (polished) => {
-              await setCached("jobs_cache", cacheId, {
-                ...cached,
-                items: polished,
-                localizedAt: new Date().toISOString(),
-                claudeLocalized: true,
-              });
-              console.log("[jobs] background Claude title polish saved");
-            })
-            .catch((err) =>
-              console.warn("[jobs] background polish failed:", err.message)
-            );
-        }
-
         return {
           items: local,
           cachedAt,
@@ -702,28 +684,28 @@ async function collectDailyJobs(forceRefresh = false) {
         source: "cache",
       };
     }
-  }
 
-  const onVercel = Boolean(process.env.VERCEL);
-  if (onVercel && !forceRefresh) {
-    const quick = sortJobsStudentFirst(enrichJobsLocal([...CURATED_JOBS]));
-    await setCached("jobs_cache", cacheId, {
-      items: quick,
-      day: todayKey(),
-      scrapedCount: 0,
-      uniqueCount: quick.length,
-      bySource: { Curated: quick.length },
-      platforms: ["Curated"],
-      localizedAt: new Date().toISOString(),
-      note: "vercel-fast-seed",
-    });
+    const yesterday = await getCached("jobs_cache", `sokcho-${yesterdayKey()}`);
+    if (yesterday?.items?.length) {
+      return {
+        items: enrichJobsLocal(yesterday.items),
+        cachedAt:
+          yesterday.cachedAt?.toDate?.()?.toISOString?.() ||
+          yesterday.cachedAt ||
+          null,
+        source: "cache-yesterday",
+      };
+    }
+
+    // Last resort: curated list in memory only (do not write — wait for daily scrape)
     return {
-      items: quick,
-      cachedAt: new Date().toISOString(),
-      source: "curated",
+      items: sortJobsStudentFirst(enrichJobsLocal([...CURATED_JOBS])),
+      cachedAt: null,
+      source: "curated-fallback",
     };
   }
 
+  const onVercel = Boolean(process.env.VERCEL);
   const sources = onVercel ? buildJobSourcesLite() : buildJobSources();
   let scraped = [];
   if (hasBrightDataKey()) {
@@ -742,7 +724,6 @@ async function collectDailyJobs(forceRefresh = false) {
   const merged = sortJobsStudentFirst(
     dedupeJobs([...CURATED_JOBS, ...scraped])
   );
-  // Rules first for speed; skip Claude polish on Vercel to avoid timeouts
   const localized = await enrichJobsWithEnglish(merged, {
     useClaude: !onVercel,
     claudeLimit: onVercel ? 0 : 200,
