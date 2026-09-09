@@ -178,12 +178,12 @@ export const NAVIGATOR_CONTENT = {
       },
       {
         title: "Getting Around Sokcho",
-        body: "City buses connect downtown, the beach, Abai Village, and routes toward Seoraksan. KakaoMap and Naver Map are the most reliable apps for real-time bus routes and walking directions. Taxis are available but cost more than buses.",
+        body: "City buses connect downtown, the beach, Abai Village, and routes toward Seoraksan. Naver Map is the best everyday choice for real-time bus routes, transfers, and walking directions in Sokcho (English UI available). KakaoMap also works well as a backup. Taxis are available but cost more than buses.",
         tips: [
-          "Save your dorm and campus pins in KakaoMap offline if possible.",
+          "Save your dorm and campus pins in Naver Map and enable offline maps if you can.",
           "Intercity buses/trains connect Sokcho to Seoul and Gangneung — book busy weekends early.",
         ],
-        link: "https://map.kakao.com",
+        link: "https://map.naver.com",
       },
       {
         title: "Food & Markets",
