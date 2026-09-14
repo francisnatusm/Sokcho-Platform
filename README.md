@@ -1,6 +1,6 @@
 # Sokcho Smart City Intelligence Platform
 
-An AI-powered civic information platform for Sokcho City, South Korea.
+An AI-powered civic information platform for Sokcho City residents, South Korea.
 Built as a Final Year Project for Smart Computing — Kyungdong University (KDU Global).
 
 ## Developer
@@ -10,7 +10,7 @@ Francis Natus Mugisha | ML & AI Engineer | github.com/francisnatusm
 - **City Pulse** — Real-time local news and weather
 - **Opportunities Board** — Jobs, internships, and scholarships
 - **Tourism & Economy Map** — Interactive Sokcho map with attraction data
-- **International Navigator** — Multilingual guide for international students
+- **International Navigator** — Multilingual living guide for residents (visa, services, campus, culture, language)
 - **AI Chatbot** — Claude-powered civic assistant in English and Korean
 - **Research Feedback System** — In-app micro-feedback for academic data collection
 

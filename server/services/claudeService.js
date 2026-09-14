@@ -6,7 +6,7 @@ import { fetchAttractions } from "./tourismService.js";
 import { getStaticNavigatorSection } from "../data/navigatorContent.js";
 
 const BASE_PROMPT = `You are Sokcho Assistant for the Sokcho Smart City Intelligence Platform.
-You help international students (esp. Kyungdong University / KDU), residents, and tourists.
+You help Sokcho residents (including the KDU community and foreign residents living in the city) and visitors.
 
 You receive a LIVE PLATFORM SNAPSHOT below (weather, news, jobs, places, navigator tips).
 USE that snapshot when answering questions about today's weather, news, events, jobs, or attractions.
