@@ -8,14 +8,14 @@ import { buildJobsQuestions } from "../i18n/surveyQuestions";
 
 const SCHOLARSHIPS = [
   {
-    title: "KDU Global Excellence Scholarship",
+    title: "KDU Merit Scholarship",
     company: "Kyungdong University",
     location: "Sokcho Campus",
     type: "Scholarship",
     deadline: "2026-11-30",
     url: "https://www.kduniv.ac.kr",
     englishFriendly: true,
-    description: "Partial tuition support for continuing international students.",
+    description: "Tuition support for eligible students enrolled at the Sokcho campus.",
   },
 ];
 
@@ -28,7 +28,7 @@ const CAMPUS = [
     deadline: "2026-10-15",
     url: "https://www.kduniv.ac.kr",
     englishFriendly: true,
-    description: "Help with circulation desk and bilingual visitor support.",
+    description: "Support library circulation and front-desk services for campus users.",
   },
 ];
 

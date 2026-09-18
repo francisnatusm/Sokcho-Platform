@@ -28,7 +28,7 @@ export default function Home() {
       description: t("home.card.tourism.desc"),
     },
     {
-      to: "/international-navigator",
+      to: "/navigator",
       title: t("nav.navigator"),
       description: t("home.card.navigator.desc"),
     },

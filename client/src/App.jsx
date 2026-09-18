@@ -37,9 +37,10 @@ function AppShell() {
           <Route path="/city-pulse" element={<CityPulse />} />
           <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/tourism-map" element={<TourismMap />} />
+          <Route path="/navigator" element={<InternationalNavigator />} />
           <Route
             path="/international-navigator"
-            element={<InternationalNavigator />}
+            element={<Navigate to="/navigator" replace />}
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

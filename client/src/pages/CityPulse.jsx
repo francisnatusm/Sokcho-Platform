@@ -11,22 +11,22 @@ const MOCK_NEWS = [
   {
     title: "속초시, 설악산 관광 활성화 방안 발표",
     description:
-      "속초시가 설악산 일대 관광 인프라 개선과 외국인 관광객 유치 방안을 발표했다.",
+      "속초시가 설악산 일대 관광 인프라 개선과 지역 방문 활성화 방안을 발표했다.",
     summaryEn:
-      "Sokcho City announced plans to improve Seoraksan tourism infrastructure and attract more international visitors.",
+      "Sokcho City announced plans to improve Seoraksan tourism infrastructure and support local visitor activity.",
     link: "https://www.sokcho.go.kr",
     pubDate: new Date().toISOString(),
     source: "Sokcho News",
   },
   {
-    title: "경동대 국제학생 지원 프로그램 확대",
+    title: "속초시, 주민 생활 정보 서비스 확대",
     description:
-      "경동대학교가 국제학생을 위한 비자 상담과 한국어 지원 프로그램을 확대한다고 밝혔다.",
+      "속초시가 시민을 위한 생활 정보 안내와 민원 지원 서비스를 확대한다고 밝혔다.",
     summaryEn:
-      "Kyungdong University expanded visa counseling and Korean language support programs for international students.",
-    link: "https://www.kduniv.ac.kr",
+      "Sokcho City expanded resident information services and public guidance support.",
+    link: "https://www.sokcho.go.kr",
     pubDate: new Date(Date.now() - 3600000).toISOString(),
-    source: "Campus Bulletin",
+    source: "City Bulletin",
   },
 ];
 

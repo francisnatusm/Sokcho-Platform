@@ -20,7 +20,7 @@ export default function Navbar({ onOpenChat }) {
     { to: "/city-pulse", label: t("nav.cityPulse") },
     { to: "/opportunities", label: t("nav.opportunities") },
     { to: "/tourism-map", label: t("nav.tourismMap") },
-    { to: "/international-navigator", label: t("nav.navigator") },
+    { to: "/navigator", label: t("nav.navigator") },
   ];
 
   function toggleLanguage() {
@@ -39,7 +39,7 @@ export default function Navbar({ onOpenChat }) {
           className="shrink-0 text-lg font-bold text-primary"
           onClick={closeMenu}
         >
-          Sokcho <span className="font-semibold">속초</span>
+          Sokcho Civic Hub
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
