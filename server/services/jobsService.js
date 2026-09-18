@@ -718,12 +718,13 @@ async function collectDailyJobs(forceRefresh = false) {
       onVercel ? 42000 : 0
     );
   } else {
-    console.warn("[jobs] Bright Data key missing — curated jobs only");
+    console.warn("[jobs] Bright Data key missing — no live scrape");
   }
 
-  const merged = sortJobsStudentFirst(
-    dedupeJobs([...CURATED_JOBS, ...scraped])
-  );
+  // Live Opportunities shows scraped postings only (no demo curated cards mixed in).
+  const merged = scraped.length
+    ? sortJobsStudentFirst(dedupeJobs(scraped))
+    : sortJobsStudentFirst(enrichJobsLocal([...CURATED_JOBS]));
   const localized = await enrichJobsWithEnglish(merged, {
     useClaude: !onVercel,
     claudeLimit: onVercel ? 0 : 200,
@@ -742,7 +743,7 @@ async function collectDailyJobs(forceRefresh = false) {
     bySource,
     platforms: [...new Set(sources.map((s) => s.name))],
     localizedAt: new Date().toISOString(),
-    note: scraped.length ? "daily-scrape" : "curated-only",
+    note: scraped.length ? "daily-scrape" : "curated-only-fallback",
   });
 
   const pruned = await pruneOldCaches("jobs_cache", {
@@ -756,16 +757,26 @@ async function collectDailyJobs(forceRefresh = false) {
   return {
     items: localized,
     cachedAt: new Date().toISOString(),
-    source: scraped.length ? "bright-data+curated" : "curated",
+    source: scraped.length ? "bright-data" : "curated-fallback",
   };
+}
+
+function isDemoJob(job) {
+  const source = String(job?.source || "");
+  return source === "Curated" || source === "KDU";
 }
 
 export async function fetchJobs(filters = {}) {
   const forceRefresh = filters.refresh === "true" || filters.refresh === true;
   const { items, cachedAt, source } = await collectDailyJobs(forceRefresh);
 
+  // Prefer real scraped postings only; curated/KDU samples appear only as last-resort fallback.
+  const visibleItems = items.some((j) => !isDemoJob(j))
+    ? items.filter((j) => !isDemoJob(j))
+    : items;
+
   // Fix legacy Karrot www.daangn.com/job-posts URLs (404) → jobs.daangn.com
-  let result = items.map((job) => {
+  let result = visibleItems.map((job) => {
     if (job.source !== "Karrot" && !String(job.url || "").includes("daangn.com")) {
       return job;
     }

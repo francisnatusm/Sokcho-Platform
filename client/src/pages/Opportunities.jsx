@@ -6,32 +6,6 @@ import { useFeedback } from "../hooks/useFeedback";
 import { getJobs, refreshJobs } from "../utils/api";
 import { buildJobsQuestions } from "../i18n/surveyQuestions";
 
-const SCHOLARSHIPS = [
-  {
-    title: "KDU Merit Scholarship",
-    company: "Kyungdong University",
-    location: "Sokcho Campus",
-    type: "Scholarship",
-    deadline: "2026-11-30",
-    url: "https://www.kduniv.ac.kr",
-    englishFriendly: true,
-    description: "Tuition support for eligible students enrolled at the Sokcho campus.",
-  },
-];
-
-const CAMPUS = [
-  {
-    title: "Student Assistant — Library Desk",
-    company: "KDU Library",
-    location: "KDU Sokcho Campus",
-    type: "Part-time",
-    deadline: "2026-10-15",
-    url: "https://www.kduniv.ac.kr",
-    englishFriendly: true,
-    description: "Support library circulation and front-desk services for campus users.",
-  },
-];
-
 export default function Opportunities() {
   const { t } = useLanguage();
   const { triggerFeedback, feedbackUI } = useFeedback();
@@ -185,28 +159,6 @@ export default function Opportunities() {
             ))}
           </div>
         )}
-      </section>
-
-      <section className="mt-10">
-        <h2 className="mb-4 text-lg font-bold text-text-primary">
-          {t("jobs.scholarships")}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {SCHOLARSHIPS.map((job) => (
-            <JobCard key={job.title} job={job} onOpen={handleOpen} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-10">
-        <h2 className="mb-4 text-lg font-bold text-text-primary">
-          {t("jobs.campus")}
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {CAMPUS.map((job) => (
-            <JobCard key={job.title} job={job} onOpen={handleOpen} />
-          ))}
-        </div>
       </section>
 
       {feedbackUI}
