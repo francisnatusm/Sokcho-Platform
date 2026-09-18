@@ -160,11 +160,22 @@ async function buildLiveSnapshot() {
           "places"
         );
         const list = Array.isArray(places) ? places : places?.items || [];
+        const byCategory = list.reduce((acc, p) => {
+          const key = String(p.category || p.type || "other").toLowerCase();
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        }, {});
+        const categoryLine = Object.keys(byCategory).length
+          ? Object.entries(byCategory)
+              .sort((a, b) => b[1] - a[1])
+              .map(([k, n]) => `${k}: ${n}`)
+              .join(", ")
+          : "n/a";
         const sample = list.slice(0, 8).map((p, i) => {
           return `${i + 1}. ${safe(p.name || p.title)} (${safe(p.category || p.type)})`;
         });
         parts.push(
-          `PLACES: ${list.length} Tourism Map pins cached. Sample:\n${sample.join("\n") || "(empty)"}`
+          `PLACES: ${list.length} Tourism Map pins cached. Counts by category: ${categoryLine}. Sample:\n${sample.join("\n") || "(empty)"}`
         );
       } catch (err) {
         parts.push(`PLACES: unavailable (${err.message})`);
