@@ -106,7 +106,7 @@ export default function Opportunities() {
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-wrap gap-2">
-            {["all", "parttime", "internship", "fulltime"].map((value) => (
+            {["all", "parttime", "fulltime"].map((value) => (
               <button
                 key={value}
                 type="button"
@@ -169,7 +169,6 @@ export default function Opportunities() {
 function labelType(value, t) {
   if (value === "all") return t("jobs.all");
   if (value === "parttime") return t("jobs.parttime");
-  if (value === "internship") return t("jobs.internship");
   if (value === "fulltime") return t("jobs.fulltime");
   return value;
 }
