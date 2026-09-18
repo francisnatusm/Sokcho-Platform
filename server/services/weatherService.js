@@ -220,6 +220,21 @@ function mergeWeather(primary, forecastSource) {
   };
 }
 
+function kstTodayDate() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+function forecastLooksStale(weather) {
+  const first = weather?.forecast?.[0]?.date;
+  if (!first) return false;
+  return String(first) < kstTodayDate();
+}
+
 export async function fetchSokchoWeather(options = {}) {
   const forceRefresh = options.force === true;
 
@@ -230,7 +245,33 @@ export async function fetchSokchoWeather(options = {}) {
       const cached = await getCached("weather_cache", "sokcho");
       if (cached?.temp != null) {
         const { cachedAt, ...weather } = cached;
-        return weather;
+        if (!forecastLooksStale(weather)) {
+          return weather;
+        }
+        // Cheap repair: refresh Open-Meteo forecast when cache days are behind today.
+        try {
+          console.warn(
+            "[weather] cached forecast is behind today — repairing with Open-Meteo",
+            weather.forecast?.[0]?.date
+          );
+          const openMeteo = await fetchOpenMeteoWeather();
+          const repaired = {
+            ...weather,
+            forecast: openMeteo?.forecast?.length
+              ? openMeteo.forecast
+              : weather.forecast,
+            source: weather.source || openMeteo?.source || "open-meteo",
+          };
+          if (openMeteo?.temp != null && weather.temp == null) {
+            repaired.temp = openMeteo.temp;
+            repaired.condition = openMeteo.condition;
+          }
+          await setCached("weather_cache", "sokcho", repaired);
+          return repaired;
+        } catch (err) {
+          console.warn("[weather] stale repair failed:", err.message);
+          return weather;
+        }
       }
     } catch {
       /* optional */

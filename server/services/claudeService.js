@@ -5,21 +5,49 @@ import { fetchJobs } from "./jobsService.js";
 import { fetchAttractions } from "./tourismService.js";
 import { getStaticNavigatorSection } from "../data/navigatorContent.js";
 
-const BASE_PROMPT = `You are Sokcho Assistant for the Sokcho Smart City Intelligence Platform.
-You help Sokcho residents (including the KDU community and foreign residents living in the city) and visitors.
+const BASE_PROMPT = `You are Sokcho Assistant for Sokcho Civic Hub.
+You help Sokcho residents (including the KDU community) with local city information.
 
-You receive a LIVE PLATFORM SNAPSHOT below (weather, news, jobs, places, navigator tips).
-USE that snapshot when answering questions about today's weather, news, events, jobs, or attractions.
+You receive a LIVE PLATFORM SNAPSHOT below (current date/time, weather, news, jobs, places, guide tips).
+USE that snapshot when answering questions about today's weather, news, events, jobs, or places.
 Do not say you lack real-time data if the snapshot already includes it.
+
+CRITICAL DATE RULES:
+- The snapshot includes TODAY's exact calendar date and weekday in Asia/Seoul (KST).
+- Always use that TODAY line for "what day/date is it?" questions.
+- Never guess today's weekday from forecast day labels (Mon/Tue/Wed...). Those are future/past forecast rows, not proof of today's weekday.
+- If CURRENT WEATHER and a forecast row look similar, that still does not change today's date.
+
 If a field is missing, say so briefly and point users to the matching platform section:
 - City Pulse → weather & news
 - Opportunities → jobs
 - Tourism Map → places
-- International Navigator → visa, services, campus, culture, language (incl. KIIP / TOPIK / IELTS)
+- City Guide → services, campus, culture, language (incl. KIIP / TOPIK / IELTS)
 
 Always reply in the same language the user writes in (English or Korean).
 Be concise, friendly, and practical. Prefer short bullet lists.
-Never invent official deadlines, visa rules, or fees — use navigator tips or direct users to Hi Korea / ISO.`;
+Never invent official deadlines, visa rules, or fees — use guide tips or direct users to Hi Korea / ISO.`;
+
+function kstNowInfo() {
+  const now = new Date();
+  const date = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    weekday: "long",
+  }).format(now);
+  const time = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(now);
+  return { date, weekday, time };
+}
 
 function getClient() {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -54,6 +82,10 @@ async function withTimeout(promise, ms, label) {
 async function buildLiveSnapshot() {
   const parts = [];
   const SNAP_MS = process.env.VERCEL ? 8000 : 20000;
+  const { date, weekday, time } = kstNowInfo();
+  parts.push(
+    `TODAY (Asia/Seoul): ${weekday}, ${date}, local time ${time}. Use this exact date/weekday for calendar questions.`
+  );
 
   const tasks = [
     (async () => {
@@ -65,17 +97,19 @@ async function buildLiveSnapshot() {
         );
         if (w) {
           parts.push(
-            `WEATHER (Sokcho): ${safe(w.temp)}°C, ${safe(w.condition)}; humidity ${safe(w.humidity)}%; precip ${safe(w.precipitation)}%; wind ${safe(w.wind)}. Source: ${safe(w.source, "platform")}.`
+            `CURRENT WEATHER (Sokcho): ${safe(w.temp)}°C, ${safe(w.condition)}; humidity ${safe(w.humidity)}%; precip ${safe(w.precipitation)}%; wind ${safe(w.wind)}. Source: ${safe(w.source, "platform")}.`
           );
           if (Array.isArray(w.forecast) && w.forecast.length) {
             const days = w.forecast
               .slice(0, 5)
               .map(
                 (d) =>
-                  `${safe(d.day || d.date)}: ${safe(d.high ?? d.max)}°/${safe(d.low ?? d.min)}° ${safe(d.condition)}`
+                  `${safe(d.date)} (${safe(d.day)}): ${safe(d.high ?? d.max)}°/${safe(d.low ?? d.min)}° ${safe(d.condition)}`
               )
               .join(" | ");
-            parts.push(`FORECAST: ${days}`);
+            parts.push(
+              `FORECAST ROWS (not the definition of "today"): ${days}`
+            );
           }
         }
       } catch (err) {
@@ -157,7 +191,7 @@ async function buildLiveSnapshot() {
   }
 
   parts.push(
-    `PLATFORM LINKS: /city-pulse · /opportunities · /tourism-map · /international-navigator`
+    `PLATFORM LINKS: /city-pulse · /opportunities · /tourism-map · /navigator`
   );
 
   return parts.join("\n\n");
