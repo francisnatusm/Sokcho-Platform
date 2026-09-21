@@ -56,7 +56,7 @@ export async function runDailyRefresh({ includeJobs = true } = {}) {
 
   try {
     const weather = await fetchSokchoWeather({ force: true });
-    result.weather = { ok: true, temp: weather?.temp };
+    result.weather = { ok: true, temp: weather?.temp, day: weather?.day || day };
   } catch (err) {
     console.error("[daily-refresh] weather failed:", err.message);
     result.weather = { ok: false, error: err.message };
@@ -106,35 +106,105 @@ export async function getLastDailyRefresh() {
   return getCached("system_cache", META_DOC);
 }
 
-/**
- * Ensure today's snapshot exists / is a real daily refresh.
- * Safe to call from Vercel Cron (GET /api/refresh/ensure).
- */
-export async function ensureTodaySnapshot() {
+/** Presentation / ops checklist: is each module fresh for Korea today? */
+export async function getPlatformReadiness() {
   const day = kstToday();
-  const jobsCache = await getCached("jobs_cache", `sokcho-${day}`);
-  const weatherCache = await getCached("weather_cache", "sokcho");
-  const meta = await getLastDailyRefresh();
+  const [jobsCache, newsCache, weatherCache, tourismCache, meta] =
+    await Promise.all([
+      getCached("jobs_cache", `sokcho-${day}`),
+      getCached("news_cache", `sokcho-${day}`),
+      getCached("weather_cache", "sokcho"),
+      getCached("tourism_cache", "places"),
+      getLastDailyRefresh(),
+    ]);
 
-  const hasRealJobs =
+  const jobsOk =
     Boolean(jobsCache?.items?.length) &&
     jobsCache.note !== "vercel-fast-seed" &&
-    Number(jobsCache.scrapedCount || 0) > 0;
+    Number(jobsCache.scrapedCount || jobsCache.items?.length || 0) > 0;
 
-  const weatherFresh =
+  const newsOk = Boolean(newsCache?.items?.length);
+
+  const weatherOk =
     weatherCache?.temp != null &&
     String(weatherCache.day || "") === day &&
     (!weatherCache.forecast?.[0]?.date ||
       String(weatherCache.forecast[0].date) >= day);
 
-  // Jobs + meta + weather must all be for today; otherwise refresh the missing parts.
-  if (hasRealJobs && meta?.day === day && weatherFresh) {
-    return { skipped: true, day, reason: "already_refreshed_today" };
+  const tourismOk =
+    Boolean(tourismCache?.items?.length) &&
+    (!tourismCache.day || String(tourismCache.day) === day);
+
+  const metaOk = meta?.day === day;
+
+  const modules = {
+    jobs: {
+      ok: jobsOk,
+      count: jobsCache?.items?.length || 0,
+      day: jobsCache?.day || (jobsOk ? day : null),
+    },
+    news: {
+      ok: newsOk,
+      count: newsCache?.items?.length || 0,
+      day: newsCache?.day || (newsOk ? day : null),
+    },
+    weather: {
+      ok: weatherOk,
+      temp: weatherCache?.temp ?? null,
+      day: weatherCache?.day || null,
+      label: weatherCache?.updatedLabel || null,
+      forecast0: weatherCache?.forecast?.[0]?.date || null,
+    },
+    tourism: {
+      ok: tourismOk,
+      count: tourismCache?.items?.length || tourismCache?.count || 0,
+      day: tourismCache?.day || null,
+    },
+    meta: {
+      ok: metaOk,
+      day: meta?.day || null,
+      finishedAt: meta?.finishedAt || null,
+    },
+  };
+
+  const ready = Object.values(modules).every((m) => m.ok);
+
+  return {
+    day,
+    ready,
+    modules,
+    tip: ready
+      ? "Platform looks fresh for today (KST)."
+      : "One or more modules are behind today — call /api/refresh/ensure or wait for daily cron.",
+  };
+}
+
+/**
+ * Ensure today's snapshot exists for jobs + news + weather + tourism.
+ * Vercel Cron sends GET /api/refresh/ensure once/twice daily.
+ */
+export async function ensureTodaySnapshot() {
+  const day = kstToday();
+  const readiness = await getPlatformReadiness();
+
+  if (readiness.ready) {
+    return {
+      skipped: true,
+      day,
+      reason: "already_refreshed_today",
+      readiness,
+    };
   }
 
-  // On Vercel cron (60s limit): scrape jobs first (lite), then refresh
-  // news/weather/tourism/navigator without another jobs scrape.
-  if (process.env.VERCEL && !hasRealJobs) {
+  const needsJobs = !readiness.modules.jobs.ok;
+  const needsLight =
+    !readiness.modules.news.ok ||
+    !readiness.modules.weather.ok ||
+    !readiness.modules.tourism.ok ||
+    !readiness.modules.meta.ok;
+
+  // On Vercel (60s limit): jobs first when missing, then light modules.
+  if (process.env.VERCEL && needsJobs) {
     let jobsResult = null;
     try {
       const jobs = await refreshJobsForToday();
@@ -148,15 +218,41 @@ export async function ensureTodaySnapshot() {
       jobsResult = { ok: false, error: err.message };
     }
     const light = await runDailyRefresh({ includeJobs: false });
-    return { skipped: false, day, vercelSplit: true, jobs: jobsResult, ...light };
+    return {
+      skipped: false,
+      day,
+      vercelSplit: true,
+      jobs: jobsResult,
+      readinessBefore: readiness,
+      ...light,
+    };
   }
 
-  if (hasRealJobs) {
-    const light = await runDailyRefresh({ includeJobs: false });
-    return { skipped: false, day, light: true, weatherWasStale: !weatherFresh, ...light };
+  if (needsJobs) {
+    return {
+      skipped: false,
+      day,
+      readinessBefore: readiness,
+      ...(await runDailyRefresh({ includeJobs: true })),
+    };
   }
 
-  return runDailyRefresh({ includeJobs: true });
+  if (needsLight) {
+    return {
+      skipped: false,
+      day,
+      light: true,
+      readinessBefore: readiness,
+      ...(await runDailyRefresh({ includeJobs: false })),
+    };
+  }
+
+  return {
+    skipped: true,
+    day,
+    reason: "nothing_to_do",
+    readiness,
+  };
 }
 
 let schedulerStarted = false;

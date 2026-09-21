@@ -29,12 +29,24 @@ const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(cors);
 
-app.get("/api/health", (_req, res) => {
+app.get("/api/health", async (_req, res) => {
+  let readiness = null;
+  try {
+    const { getPlatformReadiness } = await import(
+      "./services/dailyRefreshService.js"
+    );
+    readiness = await getPlatformReadiness();
+  } catch {
+    /* optional */
+  }
   res.json({
     status: "ok",
     service: "sokcho-platform-server",
     firebase: firebaseApp ? "connected" : "not_configured",
     env: process.env.VERCEL ? "vercel" : "node",
+    day: readiness?.day || null,
+    ready: readiness?.ready ?? null,
+    modules: readiness?.modules || null,
   });
 });
 

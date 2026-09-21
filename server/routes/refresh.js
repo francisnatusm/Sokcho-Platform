@@ -3,6 +3,7 @@ import {
   runDailyRefresh,
   getLastDailyRefresh,
   ensureTodaySnapshot,
+  getPlatformReadiness,
 } from "../services/dailyRefreshService.js";
 
 const router = Router();
@@ -37,6 +38,16 @@ router.get("/status", async (_req, res, next) => {
   try {
     const last = await getLastDailyRefresh();
     res.json({ last: last || null });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** Quick presentation checklist: are jobs/news/weather/tourism fresh for KST today? */
+router.get("/ready", async (_req, res, next) => {
+  try {
+    const readiness = await getPlatformReadiness();
+    res.status(readiness.ready ? 200 : 503).json({ success: true, ...readiness });
   } catch (err) {
     next(err);
   }

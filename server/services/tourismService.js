@@ -562,9 +562,15 @@ export async function fetchAttractions(options = {}) {
     items: merged,
     byCategory,
     count: merged.length,
+    day: new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10),
+    refreshedAt: new Date().toISOString(),
   });
   // Keep legacy doc in sync for older callers
-  await setCached("tourism_cache", "attractions", { items: merged, byCategory });
+  await setCached("tourism_cache", "attractions", {
+    items: merged,
+    byCategory,
+    day: new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10),
+  });
 
   console.log("[tourism] unique=", merged.length, byCategory);
   return merged;
