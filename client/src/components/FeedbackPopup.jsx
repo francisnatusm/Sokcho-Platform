@@ -79,8 +79,8 @@ export default function FeedbackPopup({ page, questions, sessionId, onClose }) {
         page,
         sessionId: sessionId || "anonymous",
         language,
-        platform: "sokcho-smart-city",
-        surveyVersion: "1.0",
+        platform: "sokcho-civic-hub",
+        surveyVersion: "1.1",
         responses,
       });
       onClose("submit");

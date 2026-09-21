@@ -17,7 +17,7 @@ const samples = [
     surveyVersion: "1.0",
     language: "en",
     sessionId: "demo-user-1",
-    platform: "sokcho-smart-city",
+    platform: "sokcho-civic-hub",
     responses: [
       {
         questionId: "useful",
@@ -52,7 +52,7 @@ const samples = [
     surveyVersion: "1.0",
     language: "ko",
     sessionId: "demo-user-2",
-    platform: "sokcho-smart-city",
+    platform: "sokcho-civic-hub",
     responses: [
       {
         questionId: "relevant",

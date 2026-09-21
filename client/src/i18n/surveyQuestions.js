@@ -36,9 +36,8 @@ export function buildJobsQuestions(t) {
       text: t("fb.jobs.looking"),
       type: "options",
       options: [
-        opt("job", t("fb.jobs.opt.job")),
-        opt("internship", t("fb.jobs.opt.internship")),
-        opt("scholarship", t("fb.jobs.opt.scholarship")),
+        opt("parttime", t("fb.jobs.opt.parttime")),
+        opt("fulltime", t("fb.jobs.opt.fulltime")),
         opt("other", t("fb.jobs.opt.other")),
       ],
     },
