@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config({
-  path: "e:/Smart Computer Project/sokcho-platform/.env",
+  path: "e:/Smart Computing Project/sokcho-platform/.env",
   override: true,
 });
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
