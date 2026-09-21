@@ -3,7 +3,7 @@
  * Run: npm run seed:navigator  (from server/)
  */
 import dotenv from "dotenv";
-dotenv.config({ path: "e:/Smart Computing Project/sokcho-platform/.env", override: true });
+dotenv.config({ path: "e:/Smart Computer Project/sokcho-platform/.env", override: true });
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import { initFirebaseAdmin } from "../firebase.js";

@@ -16,7 +16,7 @@ import path from "path";
 import dotenv from "dotenv";
 
 dotenv.config({
-  path: "e:/Smart Computing Project/sokcho-platform/.env",
+  path: "e:/Smart Computer Project/sokcho-platform/.env",
   override: true,
 });
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -132,7 +132,7 @@ function normalizeResponse(page, response, idx) {
 
 const day = new Date().toISOString().slice(0, 10);
 const outDir = path.resolve(
-  "e:/Smart Computing Project/sokcho-platform/exports",
+  "e:/Smart Computer Project/sokcho-platform/exports",
   `survey-${day}`
 );
 fs.mkdirSync(outDir, { recursive: true });

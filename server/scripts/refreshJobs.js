@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "e:/Smart Computing Project/sokcho-platform/.env", override: true });
+dotenv.config({ path: "e:/Smart Computer Project/sokcho-platform/.env", override: true });
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 import { refreshJobsForToday } from "../services/jobsService.js";
