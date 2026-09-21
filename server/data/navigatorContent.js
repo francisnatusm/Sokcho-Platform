@@ -1,5 +1,5 @@
 /**
- * International Navigator content for KDU Sokcho students & residents.
+ * City Guide content for KDU Sokcho students & residents.
  * Curated from official portals; optional Bright Data refresh can append live notes.
  */
 export const NAVIGATOR_SECTIONS = ["visa", "services", "campus", "culture", "language"];
@@ -158,7 +158,7 @@ export const NAVIGATOR_CONTENT = {
       },
       {
         title: "Scholarships & Campus Jobs",
-        body: "Merit, attendance, and international-student scholarships may be available through ISO or your department. On-campus assistant roles are limited — check Opportunities on this platform and ISO notice boards.",
+        body: "Merit, attendance, and international-student scholarships may be available through ISO or your department. For off-campus part-time and full-time openings near Sokcho, check Opportunities on this platform (scraped listings) and ISO notice boards for on-campus roles.",
         link: "/opportunities",
       },
     ],

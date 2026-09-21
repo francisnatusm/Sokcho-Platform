@@ -1,5 +1,5 @@
 /**
- * Survey instrument codebook for Sokcho Smart City platform feedback.
+ * Survey instrument codebook for Sokcho Civic Hub platform feedback.
  * Used for research export — keep question IDs stable across languages.
  */
 export const SURVEY_INSTRUMENTS = {
@@ -37,7 +37,7 @@ export const SURVEY_INSTRUMENTS = {
   },
   opportunities: {
     section: "Opportunities",
-    description: "Job listing relevance and findability",
+    description: "Scraped job listing relevance and findability",
     questions: [
       {
         id: "relevant",
@@ -60,13 +60,12 @@ export const SURVEY_INSTRUMENTS = {
       {
         id: "looking",
         type: "options",
-        scale: "job | internship | scholarship | other",
-        labelEn: "What type of opportunity are you most looking for?",
-        labelKo: "가장 찾고 있는 기회 유형은?",
+        scale: "parttime | fulltime | other",
+        labelEn: "What kind of job are you most looking for?",
+        labelKo: "가장 찾고 있는 일자리 유형은?",
         options: [
-          { code: "job", labelEn: "Job", labelKo: "일자리" },
-          { code: "internship", labelEn: "Internship", labelKo: "인턴" },
-          { code: "scholarship", labelEn: "Scholarship", labelKo: "장학금" },
+          { code: "parttime", labelEn: "Part-time", labelKo: "아르바이트·파트타임" },
+          { code: "fulltime", labelEn: "Full-time", labelKo: "정규직·풀타임" },
           { code: "other", labelEn: "Other", labelKo: "기타" },
         ],
       },
@@ -97,22 +96,23 @@ export const SURVEY_INSTRUMENTS = {
       {
         id: "category",
         type: "options",
-        scale: "tourism | food | health | banking | government",
+        scale: "attraction | restaurant | hotel | hospital | bank | government",
         labelEn: "Which category was most useful to you?",
         labelKo: "가장 유용했던 카테고리는?",
         options: [
-          { code: "tourism", labelEn: "Tourism", labelKo: "관광" },
-          { code: "food", labelEn: "Food", labelKo: "음식" },
-          { code: "health", labelEn: "Health", labelKo: "의료" },
-          { code: "banking", labelEn: "Banking", labelKo: "은행" },
+          { code: "attraction", labelEn: "Attractions", labelKo: "관광지" },
+          { code: "restaurant", labelEn: "Restaurants", labelKo: "음식점" },
+          { code: "hotel", labelEn: "Hotels", labelKo: "숙박" },
+          { code: "hospital", labelEn: "Hospitals", labelKo: "병원" },
+          { code: "bank", labelEn: "Banks", labelKo: "은행" },
           { code: "government", labelEn: "Government", labelKo: "관공서" },
         ],
       },
     ],
   },
   "international-navigator": {
-    section: "International Navigator",
-    description: "Guide content completeness and clarity",
+    section: "City Guide",
+    description: "City Guide content completeness and clarity",
     questions: [
       {
         id: "found",
@@ -144,7 +144,7 @@ export const SURVEY_INSTRUMENTS = {
   },
   chatbot: {
     section: "Sokcho Assistant",
-    description: "Chat assistant helpfulness",
+    description: "Civic Hub assistant helpfulness",
     questions: [
       {
         id: "helpful",

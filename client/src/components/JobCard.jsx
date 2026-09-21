@@ -2,9 +2,8 @@ import { useLanguage } from "../context/LanguageContext";
 
 const TYPE_COLORS = {
   parttime: "bg-accent/10 text-accent",
-  internship: "bg-warning/10 text-warning",
   fulltime: "bg-primary/10 text-primary",
-  scholarship: "bg-success/10 text-success",
+  other: "bg-gray-100 text-gray-700",
 };
 
 export default function JobCard({ job, onOpen }) {
@@ -91,9 +90,8 @@ export default function JobCard({ job, onOpen }) {
 function labelJobType(type, t) {
   const key = (type || "").toLowerCase().replace(/[-\s]/g, "");
   if (key === "parttime") return t("jobs.parttime");
-  if (key === "internship") return t("jobs.internship");
   if (key === "fulltime") return t("jobs.fulltime");
-  if (key === "scholarship") return t("jobs.scholarship");
+  if (key === "internship") return t("jobs.parttime");
   return type || t("jobs.other");
 }
 

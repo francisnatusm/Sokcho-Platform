@@ -14,7 +14,7 @@ const samples = [
   {
     page: "city-pulse",
     instrument: "city-pulse",
-    surveyVersion: "1.0",
+    surveyVersion: "1.1",
     language: "en",
     sessionId: "demo-user-1",
     platform: "sokcho-civic-hub",
@@ -49,7 +49,7 @@ const samples = [
   {
     page: "opportunities",
     instrument: "opportunities",
-    surveyVersion: "1.0",
+    surveyVersion: "1.1",
     language: "ko",
     sessionId: "demo-user-2",
     platform: "sokcho-civic-hub",
@@ -73,10 +73,10 @@ const samples = [
       {
         questionId: "looking",
         questionType: "options",
-        question: "What type of opportunity are you most looking for?",
-        answer: "internship",
-        answerLabel: "인턴",
-        answerCode: "internship",
+        question: "What kind of job are you most looking for?",
+        answer: "parttime",
+        answerLabel: "아르바이트·파트타임",
+        answerCode: "parttime",
       },
     ],
     timestamp: new Date(),

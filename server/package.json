@@ -1,7 +1,7 @@
 {
   "name": "sokcho-platform-server",
   "version": "1.0.0",
-  "description": "Sokcho Smart City Intelligence Platform API",
+  "description": "Sokcho Civic Hub API",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",

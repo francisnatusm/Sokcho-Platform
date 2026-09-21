@@ -1,18 +1,20 @@
-# Sokcho Smart City Intelligence Platform
+# Sokcho Civic Hub
 
-An AI-powered civic information platform for Sokcho City residents, South Korea.
+A bilingual civic information platform for Sokcho City residents, South Korea.
 Built as a Final Year Project for Smart Computing — Kyungdong University (KDU Global).
+
+Full title: **Sokcho Civic Hub: A Bilingual Smart-City Information Platform for Residents**
 
 ## Developer
 Francis Natus Mugisha | ML & AI Engineer | github.com/francisnatusm
 
 ## Features
-- **City Pulse** — Real-time local news and weather
-- **Opportunities Board** — Jobs, internships, and scholarships
-- **Tourism & Economy Map** — Interactive Sokcho map with attraction data
-- **International Navigator** — Multilingual living guide for residents (visa, services, campus, culture, language)
-- **AI Chatbot** — Claude-powered civic assistant in English and Korean
-- **Research Feedback System** — In-app micro-feedback for academic data collection
+- **City Pulse** — Local news and weather refreshed for the Korea calendar day
+- **Opportunities** — Live scraped job listings (Part-time / Full-time)
+- **Tourism Map** — Interactive Sokcho map with place categories
+- **City Guide** — Living guide for residents (visa, services, campus, culture, language)
+- **Sokcho Assistant** — Claude-powered civic assistant connected to live platform data
+- **Research Feedback** — In-app micro-feedback aligned with each page
 
 ## Tech Stack
 React + Vite, Tailwind CSS, Node.js + Express, Firebase Firestore,
@@ -25,7 +27,7 @@ Claude API, MapLibre GL JS, Recharts, Vercel
 4. `cd client && npm install && npm run dev`
 5. Open http://localhost:5173
 
-Without API keys, the platform still runs using safe mock data for news, weather, jobs, tourism, and navigator content. Claude chat and Firestore feedback persistence require real keys.
+Without API keys, some modules may show empty or cached data. Claude chat and Firestore feedback persistence require real keys.
 
 ## Optional Firebase scripts
 ```bash
@@ -42,8 +44,9 @@ npm run seed:navigator
    - Set `ALLOW_INSECURE_TLS` empty/false (never `true` on Vercel)
    - Set `CLIENT_ORIGIN` to your live site URL (e.g. `https://sokcho-platform.vercel.app`)
    - For `FIREBASE_PRIVATE_KEY`: paste the key as one line with `\n` escapes, **without** wrapping quotes in the Vercel UI
-4. Deploy. Cron hits `/api/refresh/ensure` daily at 21:00 UTC.
-5. If `/api/health` returns 500, open Vercel → Project → Logs (or the failed deployment → Functions) and check for missing modules or Firebase key errors.
+4. Deploy. Cron hits `/api/refresh/ensure` twice daily (21:00 UTC and 00:00 UTC).
+5. Check presentation readiness: `/api/refresh/ready` (should return `ready: true`).
+6. If `/api/health` returns 500, open Vercel → Project → Logs and check for missing modules or Firebase key errors.
 
 Root `vercel.json` builds the Vite client and routes `/api/*` to the Express serverless function.
 

@@ -9,224 +9,6 @@ import {
   hangulRatio,
 } from "./jobLocalize.js";
 
-const CURATED_JOBS = [
-  {
-    title: "Cafe Barista (Part-time)",
-    company: "Seorak Coffee",
-    location: "Sokcho Jungang-dong",
-    type: "Part-time",
-    deadline: daysFromNow(5),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Weekend barista near the beach. Basic Korean helpful; English-speaking tourists welcome.",
-  },
-  {
-    title: "Campus Intern — International Office",
-    company: "Kyungdong University",
-    location: "KDU Sokcho Campus",
-    type: "Internship",
-    deadline: daysFromNow(20),
-    url: "https://www.kduniv.ac.kr",
-    englishFriendly: true,
-    source: "KDU",
-    description:
-      "Support international student events, orientation materials, and campus tours.",
-  },
-  {
-    title: "Hotel Front Desk",
-    company: "Sokcho Bay Hotel",
-    location: "Daepo-dong",
-    type: "Full-time",
-    deadline: daysFromNow(12),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: false,
-    source: "Curated",
-    description:
-      "Full-time front desk associate for a coastal hotel. Korean required.",
-  },
-  {
-    title: "English Conversation Tutor (After-school)",
-    company: "Sokcho Language Hub",
-    location: "Joyang-dong",
-    type: "Part-time",
-    deadline: daysFromNow(14),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Help local middle-school students practice spoken English 3 evenings per week.",
-  },
-  {
-    title: "Restaurant Server — Seafood House",
-    company: "Abai Raw Fish Restaurant",
-    location: "Cheongho-dong",
-    type: "Part-time",
-    deadline: daysFromNow(8),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Evening shifts serving tourists. Menu cards available in English and Korean.",
-  },
-  {
-    title: "Guest House Receptionist",
-    company: "Seorak Stay Guesthouse",
-    location: "Seorak-dong",
-    type: "Part-time",
-    deadline: daysFromNow(10),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Check-in support for international backpackers. Flexible hours around class schedule.",
-  },
-  {
-    title: "Marketing Intern — Tourism Startup",
-    company: "Gangwon Travel Lab",
-    location: "Sokcho / Remote hybrid",
-    type: "Internship",
-    deadline: daysFromNow(25),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Create bilingual social media content about Sokcho attractions and student life.",
-  },
-  {
-    title: "Library Student Assistant",
-    company: "KDU Library",
-    location: "KDU Sokcho Campus",
-    type: "Part-time",
-    deadline: daysFromNow(18),
-    url: "https://www.kduniv.ac.kr",
-    englishFriendly: true,
-    source: "KDU",
-    description:
-      "Circulation desk support and bilingual help for international students.",
-  },
-  {
-    title: "Convenience Store Staff (Night)",
-    company: "CU Sokcho Central",
-    location: "Jungang-dong",
-    type: "Part-time",
-    deadline: daysFromNow(6),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: false,
-    source: "Curated",
-    description:
-      "Night shift cashier and restocking. Korean conversation required.",
-  },
-  {
-    title: "Ski Resort Winter Staff",
-    company: "Seorak Ski Village Partner",
-    location: "Near Sokcho / Yangyang",
-    type: "Part-time",
-    deadline: daysFromNow(40),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Seasonal ticket booth and guest guidance. Peak winter weekends.",
-  },
-  {
-    title: "IT Support Intern",
-    company: "KDU Smart Campus Team",
-    location: "KDU Sokcho Campus",
-    type: "Internship",
-    deadline: daysFromNow(22),
-    url: "https://www.kduniv.ac.kr",
-    englishFriendly: true,
-    source: "KDU",
-    description:
-      "Help maintain campus Wi-Fi labs, student portals, and basic troubleshooting.",
-  },
-  {
-    title: "Kitchen Assistant",
-    company: "Sokcho Central Market Kitchen",
-    location: "Jungang Market",
-    type: "Part-time",
-    deadline: daysFromNow(9),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: false,
-    source: "Curated",
-    description:
-      "Prep and cleaning support during lunch rush. No experience required.",
-  },
-  {
-    title: "Tour Guide Assistant (Weekends)",
-    company: "Sokcho City Tour Desk",
-    location: "Sokcho Expo / Beach area",
-    type: "Part-time",
-    deadline: daysFromNow(16),
-    url: "https://www.sokcho.go.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Assist English-speaking tour groups with directions and attraction info.",
-  },
-  {
-    title: "Data Entry Intern — City Open Data",
-    company: "Sokcho Smart City Lab",
-    location: "City Hall annex / Hybrid",
-    type: "Internship",
-    deadline: daysFromNow(30),
-    url: "https://www.sokcho.go.kr",
-    englishFriendly: true,
-    source: "Curated",
-    description:
-      "Organize tourism and civic datasets for public dashboards. Excel/Sheets skills helpful.",
-  },
-  {
-    title: "Hotel Housekeeping (Full-time)",
-    company: "Lakeside Resort Sokcho",
-    location: "Yeongrang-dong",
-    type: "Full-time",
-    deadline: daysFromNow(15),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: false,
-    source: "Curated",
-    description: "Daily room cleaning and laundry support. Training provided.",
-  },
-  {
-    title: "Campus Event Photographer",
-    company: "KDU Student Union",
-    location: "KDU Sokcho Campus",
-    type: "Part-time",
-    deadline: daysFromNow(11),
-    url: "https://www.kduniv.ac.kr",
-    englishFriendly: true,
-    source: "KDU",
-    description:
-      "Photograph orientation and club events. Own camera preferred.",
-  },
-  {
-    title: "Delivery Helper (E-bike)",
-    company: "Local Delivery Coop",
-    location: "Sokcho citywide",
-    type: "Part-time",
-    deadline: daysFromNow(7),
-    url: "https://www.saramin.co.kr",
-    englishFriendly: false,
-    source: "Curated",
-    description:
-      "Lunch and dinner delivery shifts. License and e-bike rental options available.",
-  },
-  {
-    title: "Research Assistant — Smart Computing",
-    company: "KDU Smart Computing Lab",
-    location: "KDU Sokcho Campus",
-    type: "Internship",
-    deadline: daysFromNow(28),
-    url: "https://www.kduniv.ac.kr",
-    englishFriendly: true,
-    source: "KDU",
-    description:
-      "Support ML demos, dataset cleaning, and documentation for civic AI projects.",
-  },
-];
-
 /** Karrot (당근알바) — primary for students. Region ID is authoritative. */
 const KARROT_DONGS = [
   { name: "동명동", id: 1971 },
@@ -697,11 +479,11 @@ async function collectDailyJobs(forceRefresh = false) {
       };
     }
 
-    // Last resort: curated list in memory only (do not write — wait for daily scrape)
+    // No scrape cache yet — return empty until daily refresh fills today
     return {
-      items: sortJobsStudentFirst(enrichJobsLocal([...CURATED_JOBS])),
+      items: [],
       cachedAt: null,
-      source: "curated-fallback",
+      source: "empty-awaiting-scrape",
     };
   }
 
@@ -721,10 +503,10 @@ async function collectDailyJobs(forceRefresh = false) {
     console.warn("[jobs] Bright Data key missing — no live scrape");
   }
 
-  // Live Opportunities shows scraped postings only (no demo curated cards mixed in).
+  // Scraped postings only — never invent curated demo cards.
   const merged = scraped.length
     ? sortJobsStudentFirst(dedupeJobs(scraped))
-    : sortJobsStudentFirst(enrichJobsLocal([...CURATED_JOBS]));
+    : [];
   const localized = await enrichJobsWithEnglish(merged, {
     useClaude: !onVercel,
     claudeLimit: onVercel ? 0 : 200,
@@ -743,7 +525,7 @@ async function collectDailyJobs(forceRefresh = false) {
     bySource,
     platforms: [...new Set(sources.map((s) => s.name))],
     localizedAt: new Date().toISOString(),
-    note: scraped.length ? "daily-scrape" : "curated-only-fallback",
+    note: scraped.length ? "daily-scrape" : "scrape-empty",
   });
 
   const pruned = await pruneOldCaches("jobs_cache", {
@@ -757,7 +539,7 @@ async function collectDailyJobs(forceRefresh = false) {
   return {
     items: localized,
     cachedAt: new Date().toISOString(),
-    source: scraped.length ? "bright-data" : "curated-fallback",
+    source: scraped.length ? "bright-data" : "scrape-empty",
   };
 }
 
@@ -770,10 +552,8 @@ export async function fetchJobs(filters = {}) {
   const forceRefresh = filters.refresh === "true" || filters.refresh === true;
   const { items, cachedAt, source } = await collectDailyJobs(forceRefresh);
 
-  // Prefer real scraped postings only; curated/KDU samples appear only as last-resort fallback.
-  const visibleItems = items.some((j) => !isDemoJob(j))
-    ? items.filter((j) => !isDemoJob(j))
-    : items;
+  // Never show curated/demo cards — scraped listings only.
+  const visibleItems = items.filter((j) => !isDemoJob(j));
 
   // Fix legacy Karrot www.daangn.com/job-posts URLs (404) → jobs.daangn.com
   let result = visibleItems.map((job) => {

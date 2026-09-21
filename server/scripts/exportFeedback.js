@@ -68,15 +68,23 @@ function toNumeric(type, code) {
     somewhat: 2,
     partially: 2,
     no: 0,
+    parttime: 1,
+    fulltime: 2,
+    other: 3,
+    // legacy codes (older survey versions)
     job: 1,
     internship: 2,
     scholarship: 3,
-    other: 4,
+    attraction: 1,
+    restaurant: 2,
+    hotel: 3,
+    hospital: 4,
+    bank: 5,
+    government: 6,
     tourism: 1,
     food: 2,
     health: 3,
     banking: 4,
-    government: 5,
   };
   const key = String(code).toLowerCase().trim();
   if (Object.prototype.hasOwnProperty.call(map, key)) return map[key];

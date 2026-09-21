@@ -2,7 +2,7 @@
   "name": "sokcho-platform",
   "private": true,
   "version": "1.0.0",
-  "description": "Sokcho Smart City Intelligence Platform",
+  "description": "Sokcho Civic Hub",
   "type": "module",
   "scripts": {
     "dev:server": "npm run dev --prefix server",

@@ -111,7 +111,7 @@ export function looksEnglishFriendly(text = "") {
 
 export function guessJobType(text = "", { source } = {}) {
   const t = String(text).toLowerCase();
-  if (t.includes("intern") || t.includes("인턴")) return "Internship";
+  if (t.includes("intern") || t.includes("인턴")) return "Part-time";
   if (
     t.includes("part") ||
     t.includes("아르바이트") ||
