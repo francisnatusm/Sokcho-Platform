@@ -76,7 +76,7 @@ async function fetchGoogleWeatherViaBrightData() {
   const precip = parseNum(pick("wob_pp"));
   const humidity = parseNum(pick("wob_hm"));
   const windRaw = pick("wob_ws") || "";
-  const updatedLabel = pick("wob_dts");
+  // Intentionally ignore Google's wob_dts ("Wednesday 7:00 AM") — use our KST stamp instead.
 
   let wind = parseNum(windRaw);
   if (/km\/h/i.test(windRaw) && wind != null) {
