@@ -113,6 +113,7 @@ export async function getLastDailyRefresh() {
 export async function ensureTodaySnapshot() {
   const day = kstToday();
   const jobsCache = await getCached("jobs_cache", `sokcho-${day}`);
+  const weatherCache = await getCached("weather_cache", "sokcho");
   const meta = await getLastDailyRefresh();
 
   const hasRealJobs =
@@ -120,7 +121,14 @@ export async function ensureTodaySnapshot() {
     jobsCache.note !== "vercel-fast-seed" &&
     Number(jobsCache.scrapedCount || 0) > 0;
 
-  if (hasRealJobs && meta?.day === day) {
+  const weatherFresh =
+    weatherCache?.temp != null &&
+    String(weatherCache.day || "") === day &&
+    (!weatherCache.forecast?.[0]?.date ||
+      String(weatherCache.forecast[0].date) >= day);
+
+  // Jobs + meta + weather must all be for today; otherwise refresh the missing parts.
+  if (hasRealJobs && meta?.day === day && weatherFresh) {
     return { skipped: true, day, reason: "already_refreshed_today" };
   }
 
@@ -145,7 +153,7 @@ export async function ensureTodaySnapshot() {
 
   if (hasRealJobs) {
     const light = await runDailyRefresh({ includeJobs: false });
-    return { skipped: false, day, light: true, ...light };
+    return { skipped: false, day, light: true, weatherWasStale: !weatherFresh, ...light };
   }
 
   return runDailyRefresh({ includeJobs: true });

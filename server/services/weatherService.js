@@ -98,7 +98,8 @@ async function fetchGoogleWeatherViaBrightData() {
     precip,
     condition,
     icon: condition,
-    updatedLabel,
+    // Do not keep Google's "Wednesday 7:00 AM" style label — it confuses "today".
+    updatedLabel: null,
     source: "google+brightdata",
   };
 }
@@ -229,54 +230,107 @@ function kstTodayDate() {
   }).format(new Date());
 }
 
+function kstClockLabel() {
+  const now = new Date();
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    weekday: "long",
+  }).format(now);
+  const time = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(now);
+  return `${weekday} ${time}`;
+}
+
 function forecastLooksStale(weather) {
   const first = weather?.forecast?.[0]?.date;
   if (!first) return false;
   return String(first) < kstTodayDate();
 }
 
+function weatherNeedsDailyRefresh(weather) {
+  if (!weather || weather.temp == null) return true;
+  if (weather.day && String(weather.day) !== kstTodayDate()) return true;
+  if (forecastLooksStale(weather)) return true;
+  return false;
+}
+
+/** Keep forecast rows from today (KST) onward and stamp our own refreshed label. */
+function normalizeWeatherPayload(weather) {
+  if (!weather) return weather;
+  const today = kstTodayDate();
+  const forecast = Array.isArray(weather.forecast)
+    ? weather.forecast.filter((d) => !d?.date || String(d.date) >= today)
+    : [];
+  return {
+    ...weather,
+    day: today,
+    forecast,
+    updatedLabel: kstClockLabel(),
+  };
+}
+
+async function repairWeatherForToday(existing = null) {
+  const openMeteo = await fetchOpenMeteoWeather();
+  const base = {
+    ...(existing || {}),
+    ...(openMeteo || {}),
+    source: existing?.source?.includes("google")
+      ? existing.source
+      : openMeteo?.source || existing?.source || "open-meteo",
+  };
+  // Prefer Open-Meteo current values when repairing a new calendar day.
+  if (openMeteo?.temp != null) {
+    base.temp = openMeteo.temp;
+    base.condition = openMeteo.condition;
+    base.icon = openMeteo.condition;
+    base.humidity = openMeteo.humidity ?? base.humidity;
+    base.wind = openMeteo.wind ?? base.wind;
+    base.precip = openMeteo.precip ?? base.precip;
+  }
+  if (openMeteo?.forecast?.length) {
+    base.forecast = openMeteo.forecast;
+  }
+  const normalized = normalizeWeatherPayload(base);
+  await setCached("weather_cache", "sokcho", normalized);
+  return normalized;
+}
+
 export async function fetchSokchoWeather(options = {}) {
   const forceRefresh = options.force === true;
 
-  // READ PATH: serve last stored weather from DB (ignore short TTL).
-  // WRITE PATH: force/cron fetches APIs and overwrites weather_cache/sokcho.
+  // READ PATH: serve last stored weather from DB.
+  // If calendar day rolled over (or forecast is behind), repair immediately for today.
   if (!forceRefresh) {
     try {
       const cached = await getCached("weather_cache", "sokcho");
       if (cached?.temp != null) {
         const { cachedAt, ...weather } = cached;
-        if (!forecastLooksStale(weather)) {
-          return weather;
+        if (!weatherNeedsDailyRefresh(weather)) {
+          return normalizeWeatherPayload(weather);
         }
-        // Cheap repair: refresh Open-Meteo forecast when cache days are behind today.
         try {
           console.warn(
-            "[weather] cached forecast is behind today — repairing with Open-Meteo",
+            "[weather] cache is behind today — repairing for",
+            kstTodayDate(),
+            "prevDay=",
+            weather.day,
+            "forecast0=",
             weather.forecast?.[0]?.date
           );
-          const openMeteo = await fetchOpenMeteoWeather();
-          const repaired = {
-            ...weather,
-            forecast: openMeteo?.forecast?.length
-              ? openMeteo.forecast
-              : weather.forecast,
-            source: weather.source || openMeteo?.source || "open-meteo",
-          };
-          if (openMeteo?.temp != null && weather.temp == null) {
-            repaired.temp = openMeteo.temp;
-            repaired.condition = openMeteo.condition;
-          }
-          await setCached("weather_cache", "sokcho", repaired);
-          return repaired;
+          return await repairWeatherForToday(weather);
         } catch (err) {
-          console.warn("[weather] stale repair failed:", err.message);
-          return weather;
+          console.warn("[weather] daily repair failed:", err.message);
+          return normalizeWeatherPayload(weather);
         }
       }
     } catch {
       /* optional */
     }
-    return MOCK_WEATHER;
+    return normalizeWeatherPayload({ ...MOCK_WEATHER });
   }
 
   let google = null;
@@ -310,6 +364,7 @@ export async function fetchSokchoWeather(options = {}) {
     mergeWeather(kma, openMeteo) ||
     MOCK_WEATHER;
 
-  await setCached("weather_cache", "sokcho", weather);
-  return weather;
+  const normalized = normalizeWeatherPayload(weather);
+  await setCached("weather_cache", "sokcho", normalized);
+  return normalized;
 }
