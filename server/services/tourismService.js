@@ -174,6 +174,15 @@ const MONTH_LABELS = [
 const SOKCHO_SGG = "51150";
 const VISITOR_TTL_MS = 12 * 60 * 60 * 1000; // refresh twice a day
 
+/** Korea calendar month as YYYYMM. offsetMonths 0 = this month, -1 = last month. */
+function kstYm(monthOffset = 0) {
+  const shifted = new Date(Date.now() + 9 * 3600000);
+  const cursor = new Date(
+    Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth() + monthOffset, 1)
+  );
+  return `${cursor.getUTCFullYear()}${String(cursor.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
 function ymLabel(ym) {
   const y = String(ym).slice(0, 4);
   const m = Number(String(ym).slice(4, 6));
@@ -580,39 +589,37 @@ export async function fetchVisitorStats(options = {}) {
   const forceRefresh = options.force === true;
   const months = Number(options.months) > 0 ? Number(options.months) : 6;
 
-  // READ PATH: recover from DB only. WRITE PATH: force/cron overwrites.
+  // READ PATH: use cache unless the published month has moved on.
   if (!forceRefresh) {
     try {
       const cached = await getCached("tourism_cache", "visitor_stats");
-      if (cached?.all?.length) {
+      const expectedYm = kstYm(-1);
+      const cachedLatest = String(cached?.latestYm || "");
+      const refreshedAt = Date.parse(cached?.refreshedAt || "");
+      const triedRecently =
+        Number.isFinite(refreshedAt) && Date.now() - refreshedAt < VISITOR_TTL_MS;
+      const behind = !cachedLatest || cachedLatest < expectedYm;
+      if (cached?.all?.length && (!behind || triedRecently)) {
         const items = cached.all.slice(-months);
         return {
           items,
           all: cached.all,
           year: items[items.length - 1]?.year || null,
-          latestYm: cached.latestYm || items[items.length - 1]?.ym || null,
+          latestYm: cachedLatest || items[items.length - 1]?.ym || null,
           source: cached.source || "korea-tourism-datalab",
-          note: cached.note || "Korea Tourism Data Lab (live)",
+          note: cached.note || "Korea Tourism Data Lab",
         };
       }
     } catch {
       /* optional */
     }
-    const all = VISITOR_STATS_FALLBACK;
-    const items = all.slice(-months);
-    return {
-      items,
-      all,
-      year: items[items.length - 1]?.year || null,
-      latestYm: items[items.length - 1]?.ym || null,
-      source: "fallback",
-      note: "Offline fallback sample",
-    };
+    // Cache is missing or a newer month should exist — fetch below.
   }
 
-  // Request a wide window; Data Lab returns whatever months are published
-  const end = new Date();
-  const endYm = `${end.getFullYear()}${String(end.getMonth() + 1).padStart(2, "0")}`;
+  // Ask through the current Korea month. Unpublished months are omitted,
+  // so the chart keeps the last 6 released months and steps forward by one
+  // when the next month is published (Aug window becomes Sep, and so on).
+  const endYm = kstYm(0);
   const startYm = "202401";
 
   let all = [];
@@ -638,16 +645,20 @@ export async function fetchVisitorStats(options = {}) {
   if (!all.length) all = VISITOR_STATS_FALLBACK;
 
   const latestYm = all[all.length - 1]?.ym || null;
+  const window = all.slice(-months);
+  const fromYm = window[0]?.ym;
+  const toYm = window[window.length - 1]?.ym;
   const note =
     source === "fallback"
       ? "Offline fallback sample"
-      : `Korea Tourism Data Lab · live through ${latestYm || "latest"}`;
+      : `Korea Tourism Data Lab · ${fromYm || "?"}–${toYm || "?"}`;
 
   await setCached("tourism_cache", "visitor_stats", {
     all,
     latestYm,
     source,
     note,
+    refreshedAt: new Date().toISOString(),
   });
 
   const items = all.slice(-months);

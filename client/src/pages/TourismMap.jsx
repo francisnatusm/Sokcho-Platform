@@ -17,6 +17,38 @@ import { useFeedback } from "../hooks/useFeedback";
 import { getAttractions, getVisitorStats } from "../utils/api";
 import { buildMapQuestions } from "../i18n/surveyQuestions";
 
+const MONTHS_EN = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+function visitorRangeText(stats, language) {
+  if (!stats?.length) return "";
+  const label = (row) => {
+    const ym = String(row.ym || "");
+    const year = ym.slice(0, 4) || String(row.year || "");
+    const month = Number(ym.slice(4, 6)) || 0;
+    if (!year || month < 1 || month > 12) return row.month || "";
+    if (language === "ko") return `${year}년 ${month}월`;
+    return `${MONTHS_EN[month - 1]} ${year}`;
+  };
+  const from = label(stats[0]);
+  const to = label(stats[stats.length - 1]);
+  if (!from) return "";
+  if (from === to) return from;
+  return `${from} – ${to}`;
+}
+
 const SOKCHO = { lng: 128.5918, lat: 38.207 };
 const CATEGORY_IDS = [
   { id: "attraction", color: MAP_PIN_COLORS.attraction },
@@ -140,14 +172,10 @@ export default function TourismMap() {
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const fittedRef = useRef(false);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { triggerFeedback, feedbackUI } = useFeedback();
   const [places, setPlaces] = useState(MOCK_PLACES);
   const [stats, setStats] = useState(MOCK_STATS);
-  const [statsMeta, setStatsMeta] = useState({
-    year: 2026,
-    note: "Korea Tourism Data Lab (live)",
-  });
   const [selected, setSelected] = useState(null);
   const [activeCategories, setActiveCategories] = useState(
     () => new Set(CATEGORY_IDS.map((c) => c.id))
@@ -189,14 +217,6 @@ export default function TourismMap() {
           ? visitorStats
           : visitorStats?.items;
         if (statsItems?.length) setStats(statsItems);
-        if (visitorStats && !Array.isArray(visitorStats)) {
-          setStatsMeta({
-            year: visitorStats.latestYm || visitorStats.year || null,
-            note:
-              visitorStats.note ||
-              "Korea Tourism Data Lab (live)",
-          });
-        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -489,9 +509,9 @@ export default function TourismMap() {
           <div className="rounded-xl border border-border bg-surface p-5 shadow-sm">
             <h2 className="font-bold text-text-primary">{t("map.visitors")}</h2>
             <p className="mt-1 text-xs text-text-secondary">
-              {statsMeta.note || t("map.visitorsNote")}
-              {statsMeta.year
-                ? ` · ${t("map.through", { ym: statsMeta.year })}`
+              {t("map.visitorsSource")}
+              {visitorRangeText(stats, language)
+                ? ` · ${visitorRangeText(stats, language)}`
                 : ""}
             </p>
             <div className="mt-3 h-56">
