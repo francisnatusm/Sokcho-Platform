@@ -9,8 +9,44 @@ const ICONS = {
   default: "🌤️",
 };
 
+function dayOrdinal(day) {
+  const n = Number(day);
+  const teen = n % 100;
+  if (teen >= 11 && teen <= 13) return `${n}th`;
+  if (n % 10 === 1) return `${n}st`;
+  if (n % 10 === 2) return `${n}nd`;
+  if (n % 10 === 3) return `${n}rd`;
+  return `${n}th`;
+}
+
+function formatWeatherDate(day, language) {
+  const iso =
+    day ||
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+  const parts = String(iso).split("-");
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const date = Number(parts[2]);
+  if (!year || !month || !date) return "";
+
+  if (language === "ko") {
+    return `${year}년 ${month}월 ${date}일`;
+  }
+
+  const monthName = new Date(Date.UTC(year, month - 1, date)).toLocaleString(
+    "en-US",
+    { month: "long", timeZone: "UTC" }
+  );
+  return `${monthName} ${dayOrdinal(date)}, ${year}`;
+}
+
 export default function WeatherWidget({ weather }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const data = weather || {
     temp: 12,
     humidity: 58,
@@ -23,13 +59,17 @@ export default function WeatherWidget({ weather }) {
 
   const icon = ICONS[data.icon] || ICONS[data.condition] || ICONS.default;
   const forecast = Array.isArray(data.forecast) ? data.forecast.slice(0, 7) : [];
+  const dateLabel = formatWeatherDate(data.day, language);
 
   return (
     <div className="rounded-xl border border-border bg-surface p-6 shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <h2 className="text-lg font-bold text-text-primary">{t("weather.title")}</h2>
-        {data.updatedLabel ? (
-          <p className="text-xs text-text-secondary">{data.updatedLabel}</p>
+        {data.updatedLabel || dateLabel ? (
+          <div className="text-right text-xs text-text-secondary">
+            {data.updatedLabel ? <p>{data.updatedLabel}</p> : null}
+            {dateLabel ? <p>{dateLabel}</p> : null}
+          </div>
         ) : null}
       </div>
 
