@@ -540,12 +540,14 @@ export default function TourismMap() {
               </ResponsiveContainer>
             </div>
             {stats?.length ? (
-              <p className="mt-3 text-[11px] leading-relaxed text-text-secondary">
-                {t("map.visitorsWindow")}{" "}
-                {t("map.visitorsLatest", {
-                  month: visitorMonthLabel(stats[stats.length - 1], language),
-                })}
-              </p>
+              <div className="mt-3 space-y-0.5 text-[11px] leading-relaxed text-text-secondary">
+                <p>{t("map.visitorsWindow")}</p>
+                <p>
+                  {t("map.visitorsLatest", {
+                    month: visitorMonthLabel(stats[stats.length - 1], language),
+                  })}
+                </p>
+              </div>
             ) : null}
           </div>
         </aside>
