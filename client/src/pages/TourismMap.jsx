@@ -32,18 +32,20 @@ const MONTHS_EN = [
   "December",
 ];
 
+function visitorMonthLabel(row, language) {
+  if (!row) return "";
+  const ym = String(row.ym || "");
+  const year = ym.slice(0, 4) || String(row.year || "");
+  const month = Number(ym.slice(4, 6)) || 0;
+  if (!year || month < 1 || month > 12) return row.month || "";
+  if (language === "ko") return `${year}년 ${month}월`;
+  return `${MONTHS_EN[month - 1]} ${year}`;
+}
+
 function visitorRangeText(stats, language) {
   if (!stats?.length) return "";
-  const label = (row) => {
-    const ym = String(row.ym || "");
-    const year = ym.slice(0, 4) || String(row.year || "");
-    const month = Number(ym.slice(4, 6)) || 0;
-    if (!year || month < 1 || month > 12) return row.month || "";
-    if (language === "ko") return `${year}년 ${month}월`;
-    return `${MONTHS_EN[month - 1]} ${year}`;
-  };
-  const from = label(stats[0]);
-  const to = label(stats[stats.length - 1]);
+  const from = visitorMonthLabel(stats[0], language);
+  const to = visitorMonthLabel(stats[stats.length - 1], language);
   if (!from) return "";
   if (from === to) return from;
   return `${from} – ${to}`;
@@ -537,6 +539,14 @@ export default function TourismMap() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+            {stats?.length ? (
+              <p className="mt-3 text-[11px] leading-relaxed text-text-secondary">
+                {t("map.visitorsWindow")}{" "}
+                {t("map.visitorsLatest", {
+                  month: visitorMonthLabel(stats[stats.length - 1], language),
+                })}
+              </p>
+            ) : null}
           </div>
         </aside>
       </div>
